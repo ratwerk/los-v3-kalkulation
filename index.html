@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOS V3 — Projektkalkulation</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+      --blue-mid: #dbeafe;
+      --green: #16a34a;
+      --green-light: #f0fdf4;
+      --orange: #ea580c;
+      --orange-light: #fff7ed;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-400: #94a3b8;
+      --gray-600: #475569;
+      --gray-800: #1e293b;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-50); color: var(--gray-800); min-height: 100vh; }
+
+    /* HEADER */
+    header { background: white; border-bottom: 1px solid var(--gray-200); padding: 16px 32px; display: flex; align-items: center; gap: 16px; }
+    .logo { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
+    .header-text h1 { font-size: 16px; font-weight: 700; color: var(--gray-800); }
+    .header-text p { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+    .header-badge { margin-left: auto; background: var(--blue-light); color: var(--blue); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+
+    /* LAYOUT */
+    .layout { display: grid; grid-template-columns: 380px 1fr; gap: 0; height: calc(100vh - 69px); overflow: hidden; }
+
+    /* CONFIG PANEL */
+    .config { background: white; border-right: 1px solid var(--gray-200); overflow-y: auto; padding: 24px 20px; }
+    .config-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400); margin-bottom: 16px; }
+
+    .phase-block { margin-bottom: 16px; border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+    .phase-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--gray-50); cursor: pointer; user-select: none; }
+    .phase-header:hover { background: var(--gray-100); }
+    .phase-toggle { width: 36px; height: 20px; background: var(--gray-200); border-radius: 10px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .phase-toggle.on { background: var(--blue); }
+    .phase-toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .phase-toggle.on::after { transform: translateX(16px); }
+    .phase-toggle.locked { background: var(--blue); opacity: 0.6; cursor: not-allowed; }
+    .phase-toggle.locked::after { transform: translateX(16px); }
+    .phase-label { flex: 1; }
+    .phase-label strong { font-size: 13px; font-weight: 600; }
+    .phase-label span { font-size: 11px; color: var(--gray-400); display: block; margin-top: 1px; }
+    .phase-price { font-size: 12px; font-weight: 600; color: var(--blue); }
+
+    .phase-stories { padding: 8px 14px 12px; }
+
+    .story-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--gray-100); }
+    .story-item:last-child { border-bottom: none; }
+    .story-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+    .story-icon.req { background: var(--blue-mid); color: var(--blue); }
+    .story-icon.opt { background: var(--gray-100); color: var(--gray-400); }
+    .story-text { flex: 1; }
+    .story-name { font-size: 12px; color: var(--gray-600); line-height: 1.4; }
+    .story-hours { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+    .story-badge { font-size: 10px; background: var(--orange-light); color: var(--orange); padding: 1px 6px; border-radius: 4px; font-weight: 600; margin-left: 4px; }
+    .story-badge.premium { background: #fdf4ff; color: #9333ea; }
+
+    /* CHOICE GROUP */
+    .choice-group { margin: 8px 0; border: 1px solid var(--gray-200); border-radius: 8px; overflow: hidden; }
+    .choice-group-label { font-size: 11px; font-weight: 600; color: var(--gray-400); padding: 6px 10px; background: var(--gray-50); }
+    .choice-option { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; transition: background 0.1s; }
+    .choice-option:hover { background: var(--gray-50); }
+    .choice-option.selected { background: var(--blue-light); }
+    .choice-option input[type=radio] { accent-color: var(--blue); width: 14px; height: 14px; flex-shrink: 0; }
+    .choice-option-text { flex: 1; }
+    .choice-option-name { font-size: 12px; font-weight: 500; color: var(--gray-800); }
+    .choice-option-desc { font-size: 11px; color: var(--gray-400); }
+    .choice-option-price { font-size: 11px; font-weight: 600; color: var(--blue); }
+    .choice-mockup-link { font-size: 10px; color: var(--blue); text-decoration: none; margin-left: 4px; }
+    .choice-mockup-link:hover { text-decoration: underline; }
+
+    /* OPTIONAL CHECKBOX */
+    .optional-row { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+    .optional-row:last-child { border-bottom: none; }
+    .optional-row input[type=checkbox] { accent-color: var(--blue); width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+    .optional-row label { font-size: 12px; color: var(--gray-600); cursor: pointer; flex: 1; }
+    .optional-row label .opt-price { font-size: 11px; color: var(--blue); font-weight: 600; display: block; }
+    .optional-row.disabled { opacity: 0.4; pointer-events: none; }
+
+    /* RESULTS PANEL */
+    .results { background: var(--gray-50); overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stat-card { background: white; border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-400); margin-bottom: 6px; }
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--gray-800); }
+    .stat-sub { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
+    .stat-card.highlight { background: var(--blue); }
+    .stat-card.highlight .stat-label { color: rgba(255,255,255,0.7); }
+    .stat-card.highlight .stat-value { color: white; }
+    .stat-card.highlight .stat-sub { color: rgba(255,255,255,0.6); }
+
+    .chart-card { background: white; border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); }
+    .chart-card h2 { font-size: 13px; font-weight: 600; color: var(--gray-800); margin-bottom: 4px; }
+    .chart-card p { font-size: 12px; color: var(--gray-400); margin-bottom: 16px; }
+    .chart-wrap { position: relative; height: 220px; }
+
+    .legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--gray-600); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    .breakdown-card { background: white; border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); }
+    .breakdown-card h2 { font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+    .breakdown-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .breakdown-row:last-child { margin-bottom: 0; }
+    .breakdown-label { font-size: 12px; color: var(--gray-600); width: 180px; flex-shrink: 0; }
+    .breakdown-bar-wrap { flex: 1; background: var(--gray-100); border-radius: 4px; height: 8px; overflow: hidden; }
+    .breakdown-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+    .breakdown-value { font-size: 12px; font-weight: 600; color: var(--gray-800); width: 80px; text-align: right; flex-shrink: 0; }
+
+    .maintenance-card { background: var(--green-light); border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
+    .maintenance-icon { font-size: 20px; }
+    .maintenance-text strong { font-size: 13px; font-weight: 600; color: var(--green); display: block; }
+    .maintenance-text span { font-size: 12px; color: #166534; }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; height: auto; }
+      .config { border-right: none; border-bottom: 1px solid var(--gray-200); }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      header { padding: 12px 16px; }
+      .results { padding: 16px; }
+      .config { padding: 16px; }
+    }
+    @media (max-width: 500px) {
+      .stats-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">LOS</div>
+  <div class="header-text">
+    <h1>Leadership Operating System V3</h1>
+    <p>Projektkalkulation — Monte-Carlo-Analyse</p>
+  </div>
+  <div class="header-badge">200 €/h</div>
+</header>
+
+<div class="layout">
+
+  <!-- CONFIG -->
+  <aside class="config">
+    <div class="config-title">Ihr Paket konfigurieren</div>
+
+    <!-- PHASE 1 -->
+    <div class="phase-block">
+      <div class="phase-header">
+        <div class="phase-toggle locked" id="toggle-p1"></div>
+        <div class="phase-label">
+          <strong>Phase 1 — Fundament & Profile</strong>
+          <span>Immer enthalten</span>
+        </div>
+        <div class="phase-price" id="price-p1">—</div>
+      </div>
+      <div class="phase-stories">
+        <!-- Required stories -->
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text">
+            <div class="story-name">Mandanten-Architektur & BFF</div>
+            <div class="story-hours">~8–20 Std.</div>
+          </div>
+        </div>
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text">
+            <div class="story-name">Login & Rollensystem (4 Rollen)</div>
+            <div class="story-hours">~4–14 Std.</div>
+          </div>
+        </div>
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text">
+            <div class="story-name">People & Organisation (Hierarchie, Profile)</div>
+            <div class="story-hours">~6–18 Std.</div>
+          </div>
+        </div>
+
+        <!-- Organigramm optional -->
+        <div class="optional-row" id="row-orgchart">
+          <input type="checkbox" id="cb-orgchart">
+          <label for="cb-orgchart">
+            Organigramm-Ansicht <span class="story-badge premium">Premium</span>
+            <span class="opt-price">+Ø ~3.200€</span>
+          </label>
+        </div>
+
+        <!-- Sprachmuster choice -->
+        <div class="choice-group" style="margin-top:8px;">
+          <div class="choice-group-label">Sprachmuster (12 Metaprogramme)</div>
+          <div class="choice-option selected" id="opt-meta-std" onclick="selectChoice('meta','std')">
+            <input type="radio" name="meta" value="std" checked>
+            <div class="choice-option-text">
+              <div class="choice-option-name">Standard — Übersicht & Bearbeitung</div>
+              <div class="choice-option-desc">View/Edit-Modus, bewährtes Design</div>
+            </div>
+            <div class="choice-option-price">Ø ~3.200€</div>
+          </div>
+          <div class="choice-option" id="opt-meta-prem" onclick="selectChoice('meta','prem')">
+            <input type="radio" name="meta" value="prem">
+            <div class="choice-option-text">
+              <div class="choice-option-name">Premium — Split-Layout <span class="story-badge premium">Premium</span></div>
+              <div class="choice-option-desc">Übersicht links, Bearbeitung rechts
+                <a href="../mockup_splitmode.html" target="_blank" class="choice-mockup-link" onclick="event.stopPropagation()">▶ Vorschau</a>
+              </div>
+            </div>
+            <div class="choice-option-price">Ø ~4.800€</div>
+          </div>
+        </div>
+
+        <!-- Führungsleitfaden choice -->
+        <div class="choice-group">
+          <div class="choice-group-label">Führungsleitfaden (Stärken, Werte, Rollen)</div>
+          <div class="choice-option selected" id="opt-leit-std" onclick="selectChoice('leit','std')">
+            <input type="radio" name="leit" value="std" checked>
+            <div class="choice-option-text">
+              <div class="choice-option-name">Standard — Formularansicht</div>
+              <div class="choice-option-desc">Strukturiertes Formular, alle Felder</div>
+            </div>
+            <div class="choice-option-price">Ø ~2.400€</div>
+          </div>
+          <div class="choice-option" id="opt-leit-prem" onclick="selectChoice('leit','prem')">
+            <input type="radio" name="leit" value="prem">
+            <div class="choice-option-text">
+              <div class="choice-option-name">Premium — Split-Layout <span class="story-badge premium">Premium</span></div>
+              <div class="choice-option-desc">Wie Sprachmuster, setzt Premium voraus</div>
+            </div>
+            <div class="choice-option-price">Ø ~1.600€</div>
+          </div>
+        </div>
+
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text"><div class="story-name">Führungshinweise & Stolpersteine</div><div class="story-hours">~6–16 Std.</div></div>
+        </div>
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text"><div class="story-name">Versionierung & Restore</div><div class="story-hours">~10–28 Std.</div></div>
+        </div>
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text"><div class="story-name">QR-Code / Einladungslink</div><div class="story-hours">~3–10 Std.</div></div>
+        </div>
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text"><div class="story-name">Datenschutz & Privacy (DSGVO)</div><div class="story-hours">~4–14 Std.</div></div>
+        </div>
+        <div class="story-item">
+          <div class="story-icon req">✓</div>
+          <div class="story-text"><div class="story-name">Responsive Design</div><div class="story-hours">~4–14 Std.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-block">
+      <div class="phase-header" onclick="togglePhase(2)">
+        <div class="phase-toggle on" id="toggle-p2"></div>
+        <div class="phase-label">
+          <strong>Phase 2 — Gespräche, Ziele & ToDos</strong>
+          <span>Gesprächs-Workflow & Verbindlichkeit</span>
+        </div>
+        <div class="phase-price" id="price-p2">—</div>
+      </div>
+      <div class="phase-stories" id="stories-p2">
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Gesprächsvorbereitung (asynchron)</div><div class="story-hours">~8–24 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Gesprächsabgleich & Terminplanung</div><div class="story-hours">~4–14 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Finale Version & Druck</div><div class="story-hours">~3–10 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Zielmanagement</div><div class="story-hours">~6–16 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">ToDo-Engine</div><div class="story-hours">~6–18 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Template-System (Markdown)</div><div class="story-hours">~4–14 Std.</div></div></div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-block">
+      <div class="phase-header" onclick="togglePhase(3)">
+        <div class="phase-toggle on" id="toggle-p3"></div>
+        <div class="phase-label">
+          <strong>Phase 3 — KI & Launch</strong>
+          <span>KI-Features, Migration, Abnahme</span>
+        </div>
+        <div class="phase-price" id="price-p3">—</div>
+      </div>
+      <div class="phase-stories" id="stories-p3">
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">KI-Anonymisierung (DSGVO)</div><div class="story-hours">~7–22 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">KI-Vorschläge Metaprogramme ↔ Stärken</div><div class="story-hours">~12–38 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Stärkentest (KI-Dialog)</div><div class="story-hours">~12–34 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">KI-Assistenz Chat</div><div class="story-hours">~8–27 Std.</div></div></div>
+
+        <div class="optional-row" id="row-ki-hints">
+          <input type="checkbox" id="cb-ki-hints">
+          <label for="cb-ki-hints">
+            KI-Hinweise für Führungshinweise <span class="story-badge premium">Premium</span>
+            <span class="opt-price">+Ø ~2.400€</span>
+          </label>
+        </div>
+        <div class="optional-row" id="row-smart">
+          <input type="checkbox" id="cb-smart">
+          <label for="cb-smart">
+            SMART-Check per KI-Dialog <span class="story-badge premium">Premium</span>
+            <span class="opt-price">+Ø ~2.000€</span>
+          </label>
+        </div>
+
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Datenmigration V2 → V3</div><div class="story-hours">~14–36 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Audit-Log & Monitoring</div><div class="story-hours">~4–14 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Feldverschlüsselung (DSGVO)</div><div class="story-hours">~4–14 Std.</div></div></div>
+        <div class="story-item"><div class="story-icon req">✓</div><div class="story-text"><div class="story-name">Abnahme, Launch & Dokumentation</div><div class="story-hours">~8–22 Std.</div></div></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- RESULTS -->
+  <main class="results">
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Optimistisch (P10)</div>
+        <div class="stat-value" id="stat-p10">—</div>
+        <div class="stat-sub">10% Wahrscheinlichkeit günstiger</div>
+      </div>
+      <div class="stat-card highlight">
+        <div class="stat-label">Wahrscheinlichster Wert (P50)</div>
+        <div class="stat-value" id="stat-p50">—</div>
+        <div class="stat-sub">50% Wahrscheinlichkeit günstiger</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Konservativ (P90)</div>
+        <div class="stat-value" id="stat-p90">—</div>
+        <div class="stat-sub">90% Wahrscheinlichkeit günstiger</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Kostenverteilung — Monte-Carlo-Simulation</h2>
+      <p>Basierend auf 50.000 Simulationen mit Dreiecksverteilung pro Story</p>
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Häufigkeit</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> P10 (optimistisch)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> P50 (wahrscheinlich)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> P90 (konservativ)</div>
+      </div>
+    </div>
+
+    <div class="breakdown-card">
+      <h2>Kostenaufteilung nach Phase (P50)</h2>
+      <div id="breakdown"></div>
+    </div>
+
+    <div class="maintenance-card">
+      <div class="maintenance-icon">🔧</div>
+      <div class="maintenance-text">
+        <strong>Wartungspauschale: 800 €/Monat</strong>
+        <span>Technische Betreuung, Updates, KI-Schnittstelle, monatliches Status-Meeting</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// STORY DATA
+// ─────────────────────────────────────────────
+const RATE = 200;
+
+const stories = {
+  // Phase 1 — always required
+  p1_arch:      { phase: 1, min: 8,  likely: 13, max: 20, type: 'required' },
+  p1_auth:      { phase: 1, min: 4,  likely: 8,  max: 14, type: 'required' },
+  p1_org:       { phase: 1, min: 6,  likely: 10, max: 18, type: 'required' },
+  p1_orgchart:  { phase: 1, min: 8,  likely: 16, max: 24, type: 'optional', controlId: 'cb-orgchart' },
+  p1_meta_std:  { phase: 1, min: 8,  likely: 16, max: 24, type: 'choice',   choiceGroup: 'meta', choiceVal: 'std' },
+  p1_meta_prem: { phase: 1, min: 14, likely: 24, max: 36, type: 'choice',   choiceGroup: 'meta', choiceVal: 'prem' },
+  p1_leit_std:  { phase: 1, min: 6,  likely: 12, max: 18, type: 'choice',   choiceGroup: 'leit', choiceVal: 'std' },
+  p1_leit_prem: { phase: 1, min: 4,  likely: 8,  max: 14, type: 'choice',   choiceGroup: 'leit', choiceVal: 'prem' },
+  p1_hints:     { phase: 1, min: 6,  likely: 10, max: 16, type: 'required' },
+  p1_vers:      { phase: 1, min: 10, likely: 18, max: 28, type: 'required' },
+  p1_qr:        { phase: 1, min: 3,  likely: 6,  max: 10, type: 'required' },
+  p1_priv:      { phase: 1, min: 4,  likely: 8,  max: 14, type: 'required' },
+  p1_ui:        { phase: 1, min: 4,  likely: 8,  max: 14, type: 'required' },
+  // Phase 2
+  p2_prep:      { phase: 2, min: 8,  likely: 16, max: 24, type: 'phase-required' },
+  p2_align:     { phase: 2, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
+  p2_final:     { phase: 2, min: 3,  likely: 6,  max: 10, type: 'phase-required' },
+  p2_goals:     { phase: 2, min: 6,  likely: 10, max: 16, type: 'phase-required' },
+  p2_todos:     { phase: 2, min: 6,  likely: 12, max: 18, type: 'phase-required' },
+  p2_tmpl:      { phase: 2, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
+  // Phase 3
+  p3_anon:      { phase: 3, min: 7,  likely: 14, max: 22, type: 'phase-required' },
+  p3_ki_meta:   { phase: 3, min: 12, likely: 26, max: 38, type: 'phase-required' },
+  p3_staerken:  { phase: 3, min: 12, likely: 21, max: 34, type: 'phase-required' },
+  p3_ki_hints:  { phase: 3, min: 8,  likely: 12, max: 18, type: 'optional', controlId: 'cb-ki-hints' },
+  p3_smart:     { phase: 3, min: 6,  likely: 10, max: 16, type: 'optional', controlId: 'cb-smart' },
+  p3_chat:      { phase: 3, min: 8,  likely: 16, max: 27, type: 'phase-required' },
+  p3_migration: { phase: 3, min: 14, likely: 22, max: 36, type: 'phase-required' },
+  p3_audit:     { phase: 3, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
+  p3_crypt:     { phase: 3, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
+  p3_launch:    { phase: 3, min: 8,  likely: 14, max: 22, type: 'phase-required' },
+};
+
+// State
+const state = {
+  phases: { 2: true, 3: true },
+  choices: { meta: 'std', leit: 'std' },
+  optionals: { 'cb-orgchart': false, 'cb-ki-hints': false, 'cb-smart': false }
+};
+
+// ─────────────────────────────────────────────
+// MONTE CARLO
+// ─────────────────────────────────────────────
+function triangular(min, likely, max) {
+  const u = Math.random();
+  const fc = (likely - min) / (max - min);
+  if (u < fc) return min + Math.sqrt(u * (max - min) * (likely - min));
+  return max - Math.sqrt((1 - u) * (max - min) * (max - likely));
+}
+
+function getActiveStories() {
+  return Object.entries(stories).filter(([key, s]) => {
+    if (s.type === 'required') return true;
+    if (s.type === 'phase-required') return state.phases[s.phase] !== false;
+    if (s.type === 'choice') {
+      // Only include if phase active and this choice is selected
+      const phaseActive = s.phase === 1 ? true : state.phases[s.phase] !== false;
+      return phaseActive && state.choices[s.choiceGroup] === s.choiceVal;
+    }
+    if (s.type === 'optional') {
+      const phaseActive = s.phase === 1 ? true : state.phases[s.phase] !== false;
+      return phaseActive && state.optionals[s.controlId];
+    }
+    return false;
+  });
+}
+
+function simulate(n = 50000) {
+  const active = getActiveStories();
+  const results = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    let total = 0;
+    for (const [, s] of active) total += triangular(s.min, s.likely, s.max);
+    results[i] = total * RATE;
+  }
+  results.sort();
+  return results;
+}
+
+function percentile(sorted, p) {
+  return sorted[Math.floor(sorted.length * p / 100)];
+}
+
+function phaseLikely(phase) {
+  return Object.values(stories)
+    .filter(s => {
+      if (s.phase !== phase) return false;
+      if (s.type === 'required') return true;
+      if (s.type === 'phase-required') return state.phases[phase] !== false;
+      if (s.type === 'choice') {
+        const phaseActive = phase === 1 ? true : state.phases[phase] !== false;
+        return phaseActive && state.choices[s.choiceGroup] === s.choiceVal;
+      }
+      if (s.type === 'optional') {
+        const phaseActive = phase === 1 ? true : state.phases[phase] !== false;
+        return phaseActive && state.optionals[s.controlId];
+      }
+      return false;
+    })
+    .reduce((sum, s) => sum + s.likely, 0) * RATE;
+}
+
+// ─────────────────────────────────────────────
+// CHART
+// ─────────────────────────────────────────────
+let chartInstance = null;
+
+function buildHistogram(sorted, bins = 40) {
+  const min = sorted[0], max = sorted[sorted.length - 1];
+  const step = (max - min) / bins;
+  const counts = new Array(bins).fill(0);
+  const labels = [];
+  for (let i = 0; i < bins; i++) labels.push(Math.round(min + i * step));
+  for (const v of sorted) {
+    const idx = Math.min(Math.floor((v - min) / step), bins - 1);
+    counts[idx]++;
+  }
+  return { labels, counts, step, min };
+}
+
+function fmt(n) {
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+}
+
+function render() {
+  const sorted = simulate();
+  const p10 = percentile(sorted, 10);
+  const p50 = percentile(sorted, 50);
+  const p90 = percentile(sorted, 90);
+
+  document.getElementById('stat-p10').textContent = fmt(p10);
+  document.getElementById('stat-p50').textContent = fmt(p50);
+  document.getElementById('stat-p90').textContent = fmt(p90);
+
+  const { labels, counts, step, min } = buildHistogram(sorted);
+
+  const colors = labels.map((v) => {
+    if (v < p10) return 'rgba(59,130,246,0.3)';
+    if (v < p50) return 'rgba(59,130,246,0.6)';
+    if (v < p90) return 'rgba(59,130,246,0.4)';
+    return 'rgba(59,130,246,0.2)';
+  });
+
+  const ctx = document.getElementById('chart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.map(v => fmt(v)),
+      datasets: [{
+        data: counts,
+        backgroundColor: colors,
+        borderWidth: 0,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => `~${items[0].label}`,
+            label: (item) => `${item.raw.toLocaleString('de-DE')} Simulationen`
+          }
+        },
+        annotation: {/* handled manually */}
+      },
+      scales: {
+        x: {
+          ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94a3b8' },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { display: false },
+          grid: { color: '#f1f5f9' }
+        }
+      }
+    },
+    plugins: [{
+      id: 'vlines',
+      afterDraw(chart) {
+        const { ctx, scales: { x, y } } = chart;
+        const lines = [
+          { val: p10, color: '#f59e0b', label: 'P10' },
+          { val: p50, color: '#ef4444', label: 'P50' },
+          { val: p90, color: '#8b5cf6', label: 'P90' },
+        ];
+        lines.forEach(({ val, color, label }) => {
+          const idx = Math.floor((val - min) / step);
+          if (idx < 0 || idx >= chart.data.labels.length) return;
+          const xPos = x.getPixelForValue(idx);
+          ctx.save();
+          ctx.beginPath();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 3]);
+          ctx.moveTo(xPos, y.top);
+          ctx.lineTo(xPos, y.bottom);
+          ctx.stroke();
+          ctx.fillStyle = color;
+          ctx.font = 'bold 10px sans-serif';
+          ctx.fillText(label, xPos + 3, y.top + 12);
+          ctx.restore();
+        });
+      }
+    }]
+  });
+
+  // Breakdown
+  const phases = [1, 2, 3];
+  const phaseLikelys = phases.map(p => phaseLikely(p));
+  const maxVal = Math.max(...phaseLikelys);
+  const phaseNames = ['Phase 1 — Fundament & Profile', 'Phase 2 — Gespräche & Ziele', 'Phase 3 — KI & Launch'];
+  const phaseColors = ['#3b82f6', '#10b981', '#8b5cf6'];
+
+  document.getElementById('breakdown').innerHTML = phases.map((p, i) => {
+    const val = phaseLikelys[i];
+    const active = p === 1 || state.phases[p] !== false;
+    const pct = maxVal > 0 ? (val / maxVal * 100) : 0;
+    return `
+      <div class="breakdown-row">
+        <div class="breakdown-label">${phaseNames[i]}</div>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar" style="width:${active ? pct : 0}%;background:${phaseColors[i]};opacity:${active?1:0.3}"></div>
+        </div>
+        <div class="breakdown-value">${active ? fmt(val) : '—'}</div>
+      </div>`;
+  }).join('');
+
+  // Phase prices
+  phases.forEach(p => {
+    const el = document.getElementById(`price-p${p}`);
+    const active = p === 1 || state.phases[p] !== false;
+    if (el) el.textContent = active ? fmt(phaseLikelys[p - 1]) : '—';
+  });
+}
+
+// ─────────────────────────────────────────────
+// UI INTERACTIONS
+// ─────────────────────────────────────────────
+function togglePhase(p) {
+  if (p === 3 && state.phases[2] === false) return; // P3 requires P2
+  state.phases[p] = !state.phases[p];
+
+  // P2 off → P3 off
+  if (p === 2 && !state.phases[2]) state.phases[3] = false;
+
+  document.getElementById(`toggle-p${p}`).classList.toggle('on', state.phases[p]);
+  const storiesEl = document.getElementById(`stories-p${p}`);
+  if (storiesEl) storiesEl.style.opacity = state.phases[p] ? '1' : '0.4';
+
+  if (p === 2) {
+    document.getElementById('toggle-p3').classList.toggle('on', state.phases[3]);
+    const s3 = document.getElementById('stories-p3');
+    if (s3) s3.style.opacity = state.phases[3] ? '1' : '0.4';
+  }
+  render();
+}
+
+function selectChoice(group, val) {
+  // Leit-premium requires meta-premium
+  if (group === 'leit' && val === 'prem' && state.choices['meta'] !== 'prem') return;
+
+  state.choices[group] = val;
+  document.querySelector(`#opt-${group}-std`).classList.toggle('selected', val === 'std');
+  document.querySelector(`#opt-${group}-prem`).classList.toggle('selected', val === 'prem');
+  document.querySelector(`input[name="${group}"][value="std"]`).checked = val === 'std';
+  document.querySelector(`input[name="${group}"][value="prem"]`).checked = val === 'prem';
+
+  // If meta goes back to std, leit must also go to std
+  if (group === 'meta' && val === 'std') selectChoice('leit', 'std');
+
+  // Enable/disable leit-prem based on meta choice
+  const leitPrem = document.getElementById('opt-leit-prem');
+  if (state.choices['meta'] === 'prem') {
+    leitPrem.style.opacity = '1';
+    leitPrem.style.pointerEvents = 'auto';
+  } else {
+    leitPrem.style.opacity = '0.4';
+    leitPrem.style.pointerEvents = 'none';
+  }
+  render();
+}
+
+// Bind optional checkboxes
+['cb-orgchart', 'cb-ki-hints', 'cb-smart'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('change', () => {
+      state.optionals[id] = el.checked;
+      render();
+    });
+  }
+});
+
+// Init
+document.getElementById('opt-leit-prem').style.opacity = '0.4';
+document.getElementById('opt-leit-prem').style.pointerEvents = 'none';
+render();
+</script>
+</body>
+</html>
