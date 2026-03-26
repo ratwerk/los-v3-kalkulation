@@ -63,10 +63,10 @@
     .pt-item.featured .pt-label { color: var(--phase); }
 
     /* CHOICE GROUP */
-    .choice-group { background: white; border: 1px solid var(--rule); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
-    .cg-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); background: var(--paper-dark); padding: 8px 16px; border-bottom: 1px solid var(--rule); }
-    .choice-opt { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; cursor: pointer; border-bottom: 1px solid var(--rule); background: white; transition: background 0.1s; }
-    .choice-opt:last-child { border-bottom: none; }
+    .choice-group { background: white; border: 1px solid var(--rule); border-radius: 10px; margin-bottom: 10px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; }
+    .cg-label { grid-column: 1 / -1; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); background: var(--paper-dark); padding: 8px 16px; border-bottom: 1px solid var(--rule); }
+    .choice-opt { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; cursor: pointer; border-right: 1px solid var(--rule); background: white; transition: background 0.1s; }
+    .choice-opt:last-child { border-right: none; }
     .choice-opt:hover { background: var(--paper); }
     .choice-opt.selected { background: var(--phase-bg); }
     .choice-opt input[type=radio] { accent-color: var(--phase); flex-shrink: 0; margin-top: 3px; cursor: pointer; }
@@ -93,7 +93,12 @@
     .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
     .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
     .ptv.featured .ptv-value { color: var(--phase); }
-    @media (max-width: 700px) { .stories-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) {
+      .stories-grid { grid-template-columns: 1fr; }
+      .choice-group { grid-template-columns: 1fr; }
+      .choice-opt { border-right: none; border-bottom: 1px solid var(--rule); }
+      .choice-opt:last-child { border-bottom: none; }
+    }
   </style>
 </head>
 <body>
