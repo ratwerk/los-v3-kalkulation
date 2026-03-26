@@ -53,11 +53,11 @@
     .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 3px; }
     .stat-value { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1; }
     .stat-note { font-size: 11px; color: #9ca3af; margin-top: 3px; }
-    .stat-box.featured { background: var(--navy); border-top-color: var(--navy); }
-    .stat-box.featured .stat-icon { color: rgba(255,255,255,0.6); }
-    .stat-box.featured .stat-label { color: rgba(255,255,255,0.5); }
-    .stat-box.featured .stat-value { color: var(--white); }
-    .stat-box.featured .stat-note { color: rgba(255,255,255,0.4); }
+    .stat-box.featured { background: #ebeef2; border-top-color: var(--navy); }
+    .stat-box.featured .stat-icon { color: var(--navy); }
+    .stat-box.featured .stat-label { color: rgba(27,45,66,0.55); }
+    .stat-box.featured .stat-value { color: var(--navy); }
+    .stat-box.featured .stat-note { color: rgba(27,45,66,0.45); }
 
     /* PHASE BOXES */
     .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
@@ -168,28 +168,6 @@
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-box">
-      <div class="stat-icon"><i data-lucide="clock" style="width:20px;height:20px"></i></div>
-      <div class="stat-label">Geschätzter Aufwand</div>
-      <div class="stat-value" id="stat-hours">—</div>
-      <div class="stat-note">Wahrscheinlicher Wert</div>
-    </div>
-    <div class="stat-box featured">
-      <div class="stat-icon"><i data-lucide="euro" style="width:20px;height:20px"></i></div>
-      <div class="stat-label">Planungswert (P50)</div>
-      <div class="stat-value" id="stat-cost">—</div>
-      <div class="stat-note">Median · 50.000 Simulationen</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-icon"><i data-lucide="layers" style="width:20px;height:20px"></i></div>
-      <div class="stat-label">Aktive Phasen</div>
-      <div class="stat-value" id="stat-phases">—</div>
-      <div class="stat-note">von 4 verfügbaren Phasen</div>
-    </div>
-  </div>
-
   <!-- PHASE BOXES -->
   <div class="phases">
 
@@ -261,6 +239,28 @@
       <div class="pbf"><span id="count-p3"></span><span class="pbf-arrow">Details & Konfiguration →</span></div>
     </a>
 
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-icon"><i data-lucide="clock" style="width:20px;height:20px"></i></div>
+      <div class="stat-label">Geschätzter Aufwand</div>
+      <div class="stat-value" id="stat-hours">—</div>
+      <div class="stat-note">Wahrscheinlicher Wert</div>
+    </div>
+    <div class="stat-box featured">
+      <div class="stat-icon"><i data-lucide="euro" style="width:20px;height:20px"></i></div>
+      <div class="stat-label">Planungswert (P50)</div>
+      <div class="stat-value" id="stat-cost">—</div>
+      <div class="stat-note">Median · 50.000 Simulationen</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon"><i data-lucide="layers" style="width:20px;height:20px"></i></div>
+      <div class="stat-label">Aktive Phasen</div>
+      <div class="stat-value" id="stat-phases">—</div>
+      <div class="stat-note">von 4 verfügbaren Phasen</div>
+    </div>
   </div>
 
   <!-- TOTALS -->
