@@ -30,7 +30,7 @@
     /* HEADER */
     .site-header { position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 1px solid var(--border); }
     .site-header-inner { max-width: 960px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 12px; }
-    .header-logo { height: 36px; width: auto; }
+    .header-logo { position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 36px; width: auto; }
     .header-title { font-size: 14px; font-weight: 700; color: var(--navy); letter-spacing: 0.01em; }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
     .header-icon-btn { background: none; border: none; cursor: pointer; color: var(--navy); opacity: 0.5; padding: 6px; display: flex; align-items: center; transition: opacity 0.2s; }
@@ -117,7 +117,7 @@
 
     /* BUTTONS */
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px; transition: all 0.2s; border: none; font-family: 'Poppins', sans-serif; }
-    .btn-outline { background: var(--white); border: 1px solid var(--navy); color: var(--navy); }
+    .btn-outline { background: var(--white); border: 1.5px solid #003862; color: #003862; }
     .btn-outline:hover { background: var(--bg); }
     .btn-primary { background: var(--magenta); color: var(--white); box-shadow: 0 2px 8px rgba(214,29,107,0.25); }
     .btn-primary:hover { background: #b8185c; }
@@ -144,28 +144,18 @@
     <img src="logo.png" alt="Ratwerk" class="header-logo" onerror="this.style.display='none'">
     <span class="header-title">LOS V3 — Projektkalkulation</span>
     <div class="header-right">
-      <button class="header-icon-btn" title="Benachrichtigungen">
-        <i data-lucide="bell" style="width:17px;height:17px"></i>
-      </button>
-      <div class="header-avatar">M</div>
+      <button class="btn btn-outline"><i data-lucide="save" style="width:13px;height:13px"></i> Speichern</button>
+      <button class="btn btn-outline"><i data-lucide="file-text" style="width:13px;height:13px"></i> PDF Export</button>
+      <button class="btn btn-primary"><i data-lucide="send" style="width:13px;height:13px"></i> Angebot senden</button>
     </div>
   </div>
 </header>
 
 <div class="content">
   <div class="page-header">
-    <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px">
-      <div>
-        <div class="kicker">Leadership Operating System V3</div>
-        <h1>Ihr individuelles Angebot</h1>
-        <p>Klicken Sie auf eine Phase für Details und Konfiguration. Die Kosten aktualisieren sich automatisch.</p>
-      </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; padding-top:8px">
-        <button class="btn btn-outline"><i data-lucide="save" style="width:13px;height:13px"></i> Speichern</button>
-        <button class="btn btn-outline"><i data-lucide="file-text" style="width:13px;height:13px"></i> PDF Export</button>
-        <button class="btn btn-primary"><i data-lucide="send" style="width:13px;height:13px"></i> Angebot senden</button>
-      </div>
-    </div>
+    <div class="kicker">Leadership Operating System V3</div>
+    <h1>Ihr individuelles Angebot</h1>
+    <p>Klicken Sie auf eine Phase für Details und Konfiguration. Die Kosten aktualisieren sich automatisch.</p>
   </div>
 
   <!-- PHASE BOXES -->
