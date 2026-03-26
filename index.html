@@ -29,7 +29,8 @@
     .page-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
 
     /* PHASE BOXES */
-    .phases { display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; }
+    .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 40px; }
+    .phases .phase-box:first-child { grid-column: 1 / -1; }
 
     .phase-box { display: block; background: white; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.1s; }
     .phase-box:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); transform: translateY(-1px); }
@@ -79,6 +80,10 @@
     .chart-box p { font-size: 12px; color: var(--ink-faint); margin-bottom: 14px; }
     .chart-wrap { height: 190px; position: relative; }
 
+    @media (max-width: 700px) {
+      .phases { grid-template-columns: 1fr; }
+      .phases .phase-box:first-child { grid-column: auto; }
+    }
     @media (max-width: 620px) {
       .s-name { width: 130px; }
       .metrics { grid-template-columns: 1fr; }
