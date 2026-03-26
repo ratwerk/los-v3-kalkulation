@@ -27,7 +27,8 @@
     .phase-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
 
     /* STORY CARDS */
-    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .stories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
     .story-card.inactive { opacity: 0.45; }
 
     .sc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 18px 0; }
@@ -48,7 +49,7 @@
     .toggle.on::after { transform: translateX(17px); }
     .toggle-label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
 
-    .sc-steps { padding: 8px 18px 14px; }
+    .sc-steps { padding: 8px 18px 14px; flex: 1; }
     .sc-steps-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 6px; }
     .sc-steps ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
     .sc-steps li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
@@ -92,6 +93,7 @@
     .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
     .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
     .ptv.featured .ptv-value { color: var(--phase); }
+    @media (max-width: 700px) { .stories-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -110,6 +112,7 @@
   </div>
 
   <div class="section-label">Technisches Fundament</div>
+  <div class="stories-grid">
 
   <!-- US-01 -->
   <div class="story-card" id="card-p1_arch">
@@ -193,8 +196,9 @@
       <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">3 PT</div></div>
     </div>
   </div>
+</div>
 
-  <div class="section-label">Merkmalsprofil — Sprachmuster (Wählen Sie eine Variante)</div>
+<div class="section-label">Merkmalsprofil — Sprachmuster (Wählen Sie eine Variante)</div>
 
   <div class="choice-group">
     <div class="cg-label">US-04 · 12 Metaprogramme</div>
@@ -274,6 +278,7 @@
   </div>
 
   <div class="section-label">Weitere Bausteine</div>
+  <div class="stories-grid">
 
   <!-- US-06 -->
   <div class="story-card" id="card-p1_hints">
@@ -378,6 +383,8 @@
       <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
       <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
     </div>
+  </div>
+
   </div>
 
   <!-- TOTAL -->

@@ -35,10 +35,10 @@
     .phase-switch-label { font-size: 14px; font-weight: 600; }
     .phase-switch-note { font-size: 12px; color: var(--ink-soft); }
 
-    .stories { display: flex; flex-direction: column; gap: 10px; }
+    .stories { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .stories.off { opacity: 0.4; pointer-events: none; }
 
-    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
     .story-card.inactive { opacity: 0.45; }
 
     .sc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 18px 0; }
@@ -50,7 +50,7 @@
     .sc-toggle { flex-shrink: 0; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
     .toggle-label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
 
-    .sc-steps { padding: 8px 18px 14px; }
+    .sc-steps { padding: 8px 18px 14px; flex: 1; }
     .sc-steps-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 6px; }
     .sc-steps ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
     .sc-steps li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
@@ -70,6 +70,7 @@
     .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
     .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
     .ptv.featured .ptv-value { color: var(--phase); }
+    @media (max-width: 700px) { .stories { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>

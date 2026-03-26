@@ -35,10 +35,10 @@
     .phase-switch-label { font-size: 14px; font-weight: 600; }
     .phase-switch-note { font-size: 12px; color: var(--ink-soft); }
 
-    .stories { display: flex; flex-direction: column; gap: 10px; }
+    .stories { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .stories.off { opacity: 0.4; pointer-events: none; }
 
-    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
     .story-card.inactive { opacity: 0.45; }
     .story-card.locked-on { border-color: var(--phase); border-width: 1.5px; }
 
@@ -56,7 +56,7 @@
     .sc-toggle { flex-shrink: 0; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
     .toggle-label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
 
-    .sc-steps { padding: 8px 18px 14px; }
+    .sc-steps { padding: 8px 18px 14px; flex: 1; }
     .sc-steps-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 6px; }
     .sc-steps ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
     .sc-steps li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
@@ -69,7 +69,7 @@
     .pt-item.featured .pt-value { color: var(--phase); }
     .pt-item.featured .pt-label { color: var(--phase); }
 
-    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin: 24px 0 10px; }
+    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin: 24px 0 10px; grid-column: 1 / -1; }
 
     .phase-total { background: white; border: 1px solid var(--rule); border-radius: 10px; padding: 24px; margin-top: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
     .pt-label-big { font-family: Georgia, serif; font-size: 16px; font-weight: 700; }
@@ -78,6 +78,7 @@
     .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
     .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
     .ptv.featured .ptv-value { color: var(--phase); }
+    @media (max-width: 700px) { .stories { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
