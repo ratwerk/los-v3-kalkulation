@@ -30,7 +30,7 @@
 
     /* PHASE BOXES */
     .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 40px; }
-    .phases .phase-box:first-child { grid-column: 1 / -1; }
+    .phase-full { grid-column: 1 / -1; }
 
     .phase-box { display: flex; flex-direction: column; background: white; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.1s; }
     .phase-box:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); transform: translateY(-1px); }
@@ -42,6 +42,7 @@
     .pb-1 { background: var(--blue-bg); color: var(--blue); }
     .pb-2 { background: var(--green-bg); color: var(--green); }
     .pb-3 { background: var(--purple-bg); color: var(--purple); }
+    .pb-mon { background: #FEF3C7; color: #D97706; }
     .phase-name { font-family: Georgia, serif; font-size: 19px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
     .phase-tagline { font-size: 13px; color: var(--ink-soft); }
 
@@ -107,7 +108,7 @@
 
   <div class="phases">
 
-    <a href="phase1.html" class="phase-box" id="box-p1">
+    <a href="phase1.html" class="phase-box phase-full" id="box-p1">
       <div class="pbh">
         <div class="pbh-left">
           <div class="phase-badge pb-1">Phase 1 · Immer enthalten</div>
@@ -122,6 +123,23 @@
       </div>
       <div class="pbb"><div class="sprint-list" id="list-p1"></div></div>
       <div class="pbf"><span id="count-p1"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
+    </a>
+
+    <a href="phase-mon.html" class="phase-box phase-full" id="box-pmon">
+      <div class="pbh">
+        <div class="pbh-left">
+          <div class="phase-badge pb-mon" id="badge-pmon">Monetarisierung · Optional</div>
+          <div class="phase-name">Monetarisierung</div>
+          <div class="phase-tagline" id="tagline-pmon">Stripe-Anbindung, Abo-Pläne, Rechnungen &amp; Self-Service</div>
+        </div>
+        <div class="pbh-right">
+          <div class="price-label">Planungswert</div>
+          <div class="price-value" id="price-pmon">—</div>
+          <div class="price-sub">wahrscheinlich</div>
+        </div>
+      </div>
+      <div class="pbb"><div class="sprint-list" id="list-pmon"></div></div>
+      <div class="pbf"><span id="count-pmon"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
     </a>
 
     <a href="phase2.html" class="phase-box" id="box-p2">
@@ -190,12 +208,13 @@
 
 <script src="shared.js"></script>
 <script>
-const COLORS = { 1: '#2D5BE3', 2: '#16A34A', 3: '#7C3AED' };
+const COLORS = { 1: '#2D5BE3', 2: '#16A34A', 3: '#7C3AED', 4: '#D97706' };
 
-function renderList(phase, state) {
+function renderList(phase, state, suffix) {
+  const id = suffix || phase;
   const active = Object.entries(STORIES).filter(([k, s]) => s.phase === phase && isActive(k, s, state));
   const maxPT = Math.max(...active.map(([, s]) => s.likely / 8), 1);
-  const container = document.getElementById(`list-p${phase}`);
+  const container = document.getElementById(`list-p${id}`);
   container.innerHTML = active.map(([, s]) => {
     const pt = s.likely / 8;
     const pct = (pt / maxPT * 100).toFixed(0);
@@ -206,7 +225,7 @@ function renderList(phase, state) {
       <span class="s-pt">${fmtPT(s.likely)}</span>
     </div>`;
   }).join('');
-  document.getElementById(`count-p${phase}`).textContent = `${active.length} Bausteine`;
+  document.getElementById(`count-p${id}`).textContent = `${active.length} Bausteine`;
 }
 
 let chartInst = null;
@@ -233,6 +252,11 @@ function render() {
     renderList(p, state);
     document.getElementById(`price-p${p}`).textContent = fmt(phaseLikely(p, state));
   });
+  renderList(4, state, 'mon');
+  document.getElementById('price-pmon').textContent = fmt(phaseLikely(4, state));
+  const posLabel = state.mon_position === 'p2' ? 'nach Phase 2' : 'nach Phase 1';
+  document.getElementById('tagline-pmon').textContent = `Einplanung ${posLabel} · Stripe, Abo-Pläne, Rechnungen & Self-Service`;
+  if (!state.phase4) { document.getElementById('badge-pmon').textContent = 'Monetarisierung · Nicht enthalten'; document.getElementById('box-pmon').classList.add('off'); }
   if (!state.phase2) { document.getElementById('badge-p2').textContent = 'Phase 2 · Nicht enthalten'; document.getElementById('box-p2').classList.add('off'); }
   if (!state.phase3) { document.getElementById('badge-p3').textContent = 'Phase 3 · Nicht enthalten'; document.getElementById('box-p3').classList.add('off'); }
 

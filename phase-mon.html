@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monetarisierung — LOS V3</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #F9F7F2; --paper-dark: #F0EDE5; --ink: #1A1A1A; --ink-soft: #4A4A4A;
+      --ink-faint: #8A8A8A; --rule: #D8D3C8; --phase: #D97706; --phase-bg: #FEF3C7;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(249,247,242,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .nav-back { font-size: 13px; color: var(--phase); text-decoration: none; font-weight: 600; }
+    .nav-back:hover { text-decoration: underline; }
+    .nav-title { font-size: 13px; color: var(--ink-soft); }
+    .nav-total { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--ink); }
+
+    .content { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .phase-header { padding: 44px 0 32px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+    .phase-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: var(--phase-bg); color: var(--phase); margin-bottom: 10px; }
+    .phase-header h1 { font-family: Georgia, serif; font-size: clamp(24px, 4vw, 34px); font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+    .phase-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
+
+    .phase-switch { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding: 14px 18px; background: white; border: 1px solid var(--rule); border-radius: 8px; }
+    .toggle { width: 40px; height: 22px; background: var(--rule); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle.on { background: var(--phase); }
+    .toggle.locked { cursor: default; opacity: 0.7; }
+    .toggle::after { content:''; position:absolute; width:18px; height:18px; background:white; border-radius:50%; top:2px; left:2px; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on::after { transform: translateX(18px); }
+    .phase-switch-label { font-size: 14px; font-weight: 600; }
+    .phase-switch-note { font-size: 12px; color: var(--ink-soft); }
+
+    /* POSITION SELECTOR */
+    .pos-select { display: flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-top: 14px; }
+    .pos-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 8px; }
+    .pos-opt { flex: 1; padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; background: var(--paper-dark); color: var(--ink-soft); transition: background 0.15s, color 0.15s; border-right: 1px solid var(--rule); }
+    .pos-opt:last-child { border-right: none; }
+    .pos-opt.selected { background: var(--phase); color: white; }
+    .pos-opt:not(.selected):hover { background: var(--paper); }
+
+    .stories { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stories.off { opacity: 0.4; pointer-events: none; }
+
+    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+    .story-card.inactive { opacity: 0.45; }
+
+    .sc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 18px 0; }
+    .sc-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .sc-id { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .sc-name { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .sc-desc { font-size: 13px; color: var(--ink-soft); padding: 0 18px 10px; line-height: 1.6; }
+
+    .sc-toggle { flex-shrink: 0; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .toggle-label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+    .sc-steps { padding: 8px 18px 14px; flex: 1; }
+    .sc-steps-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 6px; }
+    .sc-steps ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .sc-steps li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
+    .sc-steps li::before { content: '·'; position: absolute; left: 3px; color: var(--phase); font-weight: 700; }
+
+    .sc-pt { display: flex; gap: 16px; padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--rule); }
+    .pt-item { display: flex; flex-direction: column; }
+    .pt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .pt-value { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .pt-item.featured .pt-value { color: var(--phase); }
+    .pt-item.featured .pt-label { color: var(--phase); }
+
+    .phase-total { background: white; border: 1px solid var(--rule); border-radius: 10px; padding: 24px; margin-top: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .pt-label-big { font-family: Georgia, serif; font-size: 16px; font-weight: 700; }
+    .pt-values { display: flex; gap: 24px; }
+    .ptv { text-align: center; }
+    .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
+    .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
+    .ptv.featured .ptv-value { color: var(--phase); }
+    @media (max-width: 700px) { .stories { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">← Übersicht</a>
+  <span class="nav-title">Monetarisierung · Stripe &amp; Abrechnung</span>
+  <div class="nav-total" id="nav-total">—</div>
+</nav>
+
+<div class="content">
+  <div class="phase-header">
+    <div class="phase-badge">Monetarisierung · Optional</div>
+    <h1>Monetarisierung</h1>
+    <p>Stripe-Anbindung, Abo-Modelle, automatische Rechnungen und Self-Service-Portal für Ihre Kunden. Diese Phase ist optional und flexibel einplanbar.</p>
+
+    <div class="phase-switch">
+      <div class="toggle" id="phase-toggle" onclick="togglePhase()"></div>
+      <div>
+        <div class="phase-switch-label" id="phase-label">Phase enthalten</div>
+        <div class="phase-switch-note">Schaltet alle Bausteine dieser Phase ein oder aus</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <div class="pos-label">Einplanung — wann soll diese Phase stattfinden?</div>
+      <div class="pos-select">
+        <div class="pos-opt" id="pos-p1" onclick="setPosition('p1')">Nach Phase 1</div>
+        <div class="pos-opt" id="pos-p2" onclick="setPosition('p2')">Nach Phase 2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stories" id="stories">
+
+    <!-- MON-01 -->
+    <div class="story-card" id="card-mon_stripe">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">MON-01</span></div><div class="sc-name">Stripe-Grundanbindung</div></div>
+        <div class="sc-toggle" onclick="toggle('mon_stripe')"><div class="toggle on" id="t-mon_stripe"></div><span class="toggle-label" id="lbl-mon_stripe">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Technisches Fundament für alle Zahlungsfunktionen. Stripe SDK serverseitig einbinden, Webhooks absichern, API-Keys für Test- und Produktionsumgebung.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Stripe SDK server-seitig integrieren (Node.js)</li>
+        <li>API-Keys pro Umgebung konfigurieren (test/prod)</li>
+        <li>Webhook-Endpoint einrichten und Signatur verifizieren</li>
+        <li>Stripe-IDs (Customer, Subscription) im Datenmodell verankern</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- MON-02 -->
+    <div class="story-card" id="card-mon_checkout">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">MON-02</span></div><div class="sc-name">Abo-Pläne &amp; Checkout</div></div>
+        <div class="sc-toggle" onclick="toggle('mon_checkout')"><div class="toggle on" id="t-mon_checkout"></div><span class="toggle-label" id="lbl-mon_checkout">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Preispläne in Stripe anlegen und den Checkout-Prozess einbinden. Beim ersten Abo wird der Mandant als Stripe-Customer angelegt.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Preisplan-Struktur in Stripe definieren (monatlich/jährlich)</li>
+        <li>Stripe Checkout oder Payment Element einbinden</li>
+        <li>Erfolgs- und Abbruchseiten</li>
+        <li>Neuer Mandant → Stripe Customer automatisch anlegen</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- MON-03 -->
+    <div class="story-card" id="card-mon_portal">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">MON-03</span></div><div class="sc-name">Kundenportal (Self-Service)</div></div>
+        <div class="sc-toggle" onclick="toggle('mon_portal')"><div class="toggle on" id="t-mon_portal"></div><span class="toggle-label" id="lbl-mon_portal">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Stripe Customer Portal aktivieren: Kunden verwalten Plan, Kündigung und Zahlungsdaten selbst — ohne Support-Aufwand.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Stripe Customer Portal konfigurieren und aktivieren</li>
+        <li>Link ins Admin-Bereich einbinden</li>
+        <li>Rückleitung nach Portalbesuch</li>
+        <li>Zugangsrechte bei Plan-Änderung automatisch aktualisieren</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- MON-04 -->
+    <div class="story-card" id="card-mon_invoices">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">MON-04</span></div><div class="sc-name">Rechnungen &amp; Steuer</div></div>
+        <div class="sc-toggle" onclick="toggle('mon_invoices')"><div class="toggle on" id="t-mon_invoices"></div><span class="toggle-label" id="lbl-mon_invoices">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Stripe erstellt Rechnungen automatisch. EU-Mehrwertsteuer wird via Stripe Tax korrekt ausgewiesen. Rechnungen sind im Portal abrufbar.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Automatische Rechnungserstellung via Stripe aktivieren</li>
+        <li>Stripe Tax für EU-MwSt konfigurieren</li>
+        <li>Rechnungs-Download im Admin-Portal</li>
+        <li>Steuerbefreit-Einstellung pro Mandant</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- MON-05 -->
+    <div class="story-card" id="card-mon_webhook">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">MON-05</span></div><div class="sc-name">Webhook-Engine &amp; Zugangssteuerung</div></div>
+        <div class="sc-toggle" onclick="toggle('mon_webhook')"><div class="toggle on" id="t-mon_webhook"></div><span class="toggle-label" id="lbl-mon_webhook">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Zahlungsereignisse in Echtzeit verarbeiten: Zugang bei Zahlung freigeben, bei Kündigung oder Ablauf automatisch sperren.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Relevante Events verarbeiten (invoice.paid, subscription.deleted, …)</li>
+        <li>Mandanten-Zugang bei Ablauf automatisch sperren</li>
+        <li>Retry-Logik bei fehlgeschlagenen Zahlungen</li>
+        <li>Testabdeckung aller kritischen Zahlungspfade</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2 PT</div></div>
+      </div>
+    </div>
+
+    <!-- MON-06 -->
+    <div class="story-card" id="card-mon_admin">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">MON-06</span></div><div class="sc-name">Admin-Dashboard Abrechnung</div></div>
+        <div class="sc-toggle" onclick="toggle('mon_admin')"><div class="toggle on" id="t-mon_admin"></div><span class="toggle-label" id="lbl-mon_admin">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Übersicht aller aktiven Abonnements, Zahlungsstatus und Umsatz. Direkt-Links ins Stripe Dashboard für manuelle Eingriffe.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Abonnement-Übersicht im Admin-Bereich</li>
+        <li>Zahlungsstatus und nächste Fälligkeit anzeigen</li>
+        <li>Direkt-Link ins Stripe Dashboard</li>
+        <li>Manuelle Aktionen: Abo pausieren, Rabatt gewähren</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2 PT</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="phase-total">
+    <div class="pt-label-big">Monetarisierung gesamt</div>
+    <div class="pt-values">
+      <div class="ptv"><div class="ptv-label">Optimistisch</div><div class="ptv-value" id="tot-min">—</div></div>
+      <div class="ptv featured"><div class="ptv-label">Wahrscheinlich</div><div class="ptv-value" id="tot-likely">—</div></div>
+      <div class="ptv"><div class="ptv-label">Konservativ</div><div class="ptv-value" id="tot-max">—</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const state = loadState();
+const KEYS = ['mon_stripe','mon_checkout','mon_portal','mon_invoices','mon_webhook','mon_admin'];
+
+function applyState() {
+  const phaseOn = !!state.phase4;
+  document.getElementById('phase-toggle').classList.toggle('on', phaseOn);
+  document.getElementById('phase-label').textContent = phaseOn ? 'Phase enthalten' : 'Phase nicht enthalten';
+  document.getElementById('stories').classList.toggle('off', !phaseOn);
+
+  KEYS.forEach(key => {
+    const on = !!state[key];
+    const t = document.getElementById(`t-${key}`);
+    const l = document.getElementById(`lbl-${key}`);
+    if (t) t.classList.toggle('on', on);
+    if (l) l.textContent = on ? 'Enthalten' : 'Nicht enthalten';
+    const card = document.getElementById(`card-${key}`);
+    if (card) card.classList.toggle('inactive', !on);
+  });
+
+  ['p1','p2'].forEach(p => {
+    document.getElementById(`pos-${p}`)?.classList.toggle('selected', state.mon_position === p);
+  });
+
+  updateTotal();
+}
+
+function togglePhase() {
+  state.phase4 = !state.phase4;
+  saveState(state);
+  applyState();
+}
+
+function toggle(key) {
+  state[key] = !state[key];
+  saveState(state);
+  applyState();
+}
+
+function setPosition(pos) {
+  state.mon_position = pos;
+  saveState(state);
+  applyState();
+}
+
+function updateTotal() {
+  const active = Object.entries(STORIES).filter(([k, s]) => s.phase === 4 && isActive(k, s, state));
+  const min = active.reduce((s, [, x]) => s + x.min, 0) * RATE;
+  const likely = active.reduce((s, [, x]) => s + x.likely, 0) * RATE;
+  const max = active.reduce((s, [, x]) => s + x.max, 0) * RATE;
+  document.getElementById('tot-min').textContent = fmt(min);
+  document.getElementById('tot-likely').textContent = fmt(likely);
+  document.getElementById('tot-max').textContent = fmt(max);
+  document.getElementById('nav-total').textContent = fmt(likely);
+}
+
+applyState();
+</script>
+</body>
+</html>

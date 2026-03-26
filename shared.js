@@ -153,17 +153,50 @@ const STORIES = {
     id:'US-24', name:'Abnahme, Launch & Einweisung',
     desc:'Produktions-Deployment, Abnahme-Tests mit dem Auftraggeber, Einweisung aller Rollen und Kurzanleitungen.',
     steps:['Produktions-Deployment und finale Tests','Abnahme mit Auftraggeber','Einweisung für alle Rollen (Admin, FK, MA)','Kurzanleitungen erstellen'] },
+
+  // Phase Monetarisierung
+  mon_stripe:   { phase:4, min:8,  likely:14, max:22, type:'toggle', stateKey:'mon_stripe', defaultOn:true,
+    id:'MON-01', name:'Stripe-Grundanbindung',
+    desc:'Technisches Fundament für alle Zahlungsfunktionen. Stripe SDK serverseitig einbinden, Webhooks absichern, API-Keys für Test- und Produktionsumgebung.',
+    steps:['Stripe SDK server-seitig integrieren (Node.js)','API-Keys pro Umgebung konfigurieren (test/prod)','Webhook-Endpoint einrichten und Signatur verifizieren','Stripe-IDs (Customer, Subscription) im Datenmodell verankern'] },
+
+  mon_checkout: { phase:4, min:8,  likely:14, max:22, type:'toggle', stateKey:'mon_checkout', defaultOn:true,
+    id:'MON-02', name:'Abo-Pläne & Checkout',
+    desc:'Preispläne in Stripe anlegen und den Checkout-Prozess einbinden. Beim ersten Abo wird der Mandant als Stripe-Customer angelegt.',
+    steps:['Preisplan-Struktur in Stripe definieren (monatlich/jährlich)','Stripe Checkout oder Payment Element einbinden','Erfolgs- und Abbruchseiten','Neuer Mandant → Stripe Customer automatisch anlegen'] },
+
+  mon_portal:   { phase:4, min:4,  likely:8,  max:14, type:'toggle', stateKey:'mon_portal', defaultOn:true,
+    id:'MON-03', name:'Kundenportal (Self-Service)',
+    desc:'Stripe Customer Portal aktivieren: Kunden verwalten Plan, Kündigung und Zahlungsdaten selbst — ohne Support-Aufwand.',
+    steps:['Stripe Customer Portal konfigurieren und aktivieren','Link ins Admin-Bereich einbinden','Rückleitung nach Portalbesuch','Zugangsrechte bei Plan-Änderung automatisch aktualisieren'] },
+
+  mon_invoices: { phase:4, min:4,  likely:8,  max:14, type:'toggle', stateKey:'mon_invoices', defaultOn:true,
+    id:'MON-04', name:'Rechnungen & Steuer',
+    desc:'Stripe erstellt Rechnungen automatisch. EU-Mehrwertsteuer wird via Stripe Tax korrekt ausgewiesen. Rechnungen sind im Portal abrufbar.',
+    steps:['Automatische Rechnungserstellung via Stripe aktivieren','Stripe Tax für EU-MwSt konfigurieren','Rechnungs-Download im Admin-Portal','Steuerbefreit-Einstellung pro Mandant'] },
+
+  mon_webhook:  { phase:4, min:6,  likely:10, max:18, type:'toggle', stateKey:'mon_webhook', defaultOn:true,
+    id:'MON-05', name:'Webhook-Engine & Zugangssteuerung',
+    desc:'Zahlungsereignisse in Echtzeit verarbeiten: Zugang bei Zahlung freigeben, bei Kündigung oder Ablauf automatisch sperren.',
+    steps:['Relevante Events verarbeiten (invoice.paid, subscription.deleted, …)','Mandanten-Zugang bei Ablauf automatisch sperren','Retry-Logik bei fehlgeschlagenen Zahlungen','Testabdeckung aller kritischen Zahlungspfade'] },
+
+  mon_admin:    { phase:4, min:6,  likely:10, max:16, type:'toggle', stateKey:'mon_admin', defaultOn:true,
+    id:'MON-06', name:'Admin-Dashboard Abrechnung',
+    desc:'Übersicht aller aktiven Abonnements, Zahlungsstatus und Umsatz. Direkt-Links ins Stripe Dashboard für manuelle Eingriffe.',
+    steps:['Abonnement-Übersicht im Admin-Bereich','Zahlungsstatus und nächste Fälligkeit anzeigen','Direkt-Link ins Stripe Dashboard','Manuelle Aktionen: Abo pausieren, Rabatt gewähren'] },
 };
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 const DEFAULT_STATE = {
-  phase2: true, phase3: true,
+  phase2: true, phase3: true, phase4: true,
   meta: 'std', leit: 'std',
   p1_orgchart: false,
   p1_hints: true, p1_vers: true, p1_qr: true,
   p2_prep: true, p2_align: true, p2_final: true, p2_goals: true, p2_todos: true, p2_tmpl: true,
   p3_anon: true, p3_ki_meta: true, p3_staerken: true, p3_ki_hints: false, p3_smart: false,
   p3_chat: true, p3_migration: true, p3_audit: true, p3_crypt: true, p3_launch: true,
+  mon_position: 'p1',
+  mon_stripe: true, mon_checkout: true, mon_portal: true, mon_invoices: true, mon_webhook: true, mon_admin: true,
 };
 
 function loadState() {
