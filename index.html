@@ -19,7 +19,7 @@
       --white: #ffffff;
       --gray: #363636;
       --border: #e5e7eb;
-      --blue: #2563eb; --blue-bg: #eff6ff;
+      --blue: #1b2d42; --blue-bg: #ebeef2;
       --green: #16a34a; --green-bg: #f0fdf4;
       --purple: #7c3aed; --purple-bg: #f5f3ff;
       --amber: #d97706; --amber-bg: #fffbeb;
@@ -53,6 +53,11 @@
     .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 3px; }
     .stat-value { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1; }
     .stat-note { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+    .stat-box.featured { background: var(--navy); border-top-color: var(--navy); }
+    .stat-box.featured .stat-icon { color: rgba(255,255,255,0.6); }
+    .stat-box.featured .stat-label { color: rgba(255,255,255,0.5); }
+    .stat-box.featured .stat-value { color: var(--white); }
+    .stat-box.featured .stat-note { color: rgba(255,255,255,0.4); }
 
     /* PHASE BOXES */
     .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
@@ -171,7 +176,7 @@
       <div class="stat-value" id="stat-hours">—</div>
       <div class="stat-note">Wahrscheinlicher Wert</div>
     </div>
-    <div class="stat-box">
+    <div class="stat-box featured">
       <div class="stat-icon"><i data-lucide="euro" style="width:20px;height:20px"></i></div>
       <div class="stat-label">Planungswert (P50)</div>
       <div class="stat-value" id="stat-cost">—</div>
@@ -291,7 +296,7 @@
 </div>
 
 <footer class="site-footer">
-  &copy; 2026 Ratwerk &nbsp;·&nbsp;
+  <span style="color:var(--navy);font-weight:700;">LOS V3</span> &nbsp;·&nbsp; &copy; 2026 Ratwerk &nbsp;·&nbsp;
   <a href="#">Impressum</a>
   <a href="#">Datenschutz</a>
   <a href="#">Support</a>
@@ -301,7 +306,7 @@
 <script>
 lucide.createIcons();
 
-const COLORS = { 1: '#2563eb', 2: '#16a34a', 3: '#7c3aed', 4: '#d97706' };
+const COLORS = { 1: '#1b2d42', 2: '#16a34a', 3: '#7c3aed', 4: '#d97706' };
 
 function renderList(phase, state, suffix) {
   const id = suffix || phase;
