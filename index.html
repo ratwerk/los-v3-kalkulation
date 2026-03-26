@@ -4,270 +4,393 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LOS V3 — Projektkalkulation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Poppins', 'sans-serif'] } } } }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --paper: #F9F7F2; --paper-dark: #F0EDE5; --ink: #1A1A1A; --ink-soft: #4A4A4A;
-      --ink-faint: #8A8A8A; --rule: #D8D3C8;
-      --blue: #2D5BE3; --blue-bg: #EEF2FC;
-      --green: #16A34A; --green-bg: #F0FDF4;
-      --purple: #7C3AED; --purple-bg: #F5F3FF;
+      --magenta: #d61d6b;
+      --navy: #1b2d42;
+      --bg: #f6f6f6;
+      --white: #ffffff;
+      --gray: #363636;
+      --border: #e5e7eb;
     }
-    html { scroll-behavior: smooth; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+    * { font-family: 'Poppins', sans-serif; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--gray); margin: 0; }
 
-    .nav { position: sticky; top: 0; z-index: 100; background: rgba(249,247,242,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
-    .nav-brand { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 0.04em; }
-    .nav-total { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--ink); }
+    /* HEADER */
+    .site-header { position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 1px solid var(--border); }
+    .site-header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; gap: 12px; }
+    .header-logo { height: 40px; width: auto; }
+    .header-title { font-size: 15px; font-weight: 700; color: var(--navy); letter-spacing: 0.01em; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+    .header-icon-btn { background: none; border: none; cursor: pointer; color: var(--navy); opacity: 0.6; padding: 6px; display: flex; align-items: center; transition: opacity 0.2s; }
+    .header-icon-btn:hover { opacity: 1; }
+    .header-user { display: flex; align-items: center; gap: 8px; }
+    .header-username { font-size: 13px; font-weight: 500; color: var(--navy); }
+    .header-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--magenta); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 
-    .content { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+    /* MAIN */
+    .main-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
 
-    .page-header { padding: 52px 0 36px; }
-    .kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
-    .page-header h1 { font-family: Georgia, serif; font-size: clamp(26px, 4vw, 38px); font-weight: 700; line-height: 1.2; margin-bottom: 10px; }
-    .page-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
+    /* PAGE TITLE */
+    .page-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .page-sub { font-size: 13px; color: #6b7280; margin-bottom: 28px; }
 
-    /* PHASE BOXES */
-    .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 40px; }
-    .phase-full { grid-column: 1 / -1; }
+    /* STAT BOXES */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-box { background: var(--white); border-top: 4px solid var(--magenta); padding: 20px 22px; }
+    .stat-icon { color: var(--magenta); margin-bottom: 10px; }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; margin-bottom: 4px; }
+    .stat-value { font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1; }
+    .stat-note { font-size: 11px; color: #9ca3af; margin-top: 4px; }
 
-    .phase-box { display: flex; flex-direction: column; background: white; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.1s; }
-    .phase-box:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); transform: translateY(-1px); }
-    .phase-box.off { opacity: 0.5; }
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 4px; transition: all 0.2s; border: none; }
+    .btn-outline { background: var(--white); border: 1px solid var(--navy); color: var(--navy); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-primary { background: var(--magenta); color: var(--white); box-shadow: 0 2px 8px rgba(214,29,107,0.3); }
+    .btn-primary:hover { background: #b8185c; box-shadow: 0 4px 12px rgba(214,29,107,0.4); }
 
-    .pbh { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 20px 24px 16px; border-bottom: 1px solid var(--rule); }
-    .pbh-left {}
-    .phase-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 6px; }
-    .pb-1 { background: var(--blue-bg); color: var(--blue); }
-    .pb-2 { background: var(--green-bg); color: var(--green); }
-    .pb-3 { background: var(--purple-bg); color: var(--purple); }
-    .pb-mon { background: #FEF3C7; color: #D97706; }
-    .phase-name { font-family: Georgia, serif; font-size: 19px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
-    .phase-tagline { font-size: 13px; color: var(--ink-soft); }
+    /* SECTION CARD */
+    .section-card { background: var(--white); padding: 24px; margin-bottom: 20px; }
+    .section-card-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-    .pbh-right { text-align: right; flex-shrink: 0; }
-    .price-label { font-size: 11px; color: var(--ink-faint); margin-bottom: 4px; }
-    .price-value { font-family: Georgia, serif; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
-    .price-sub { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+    /* PROJECT FORM */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #6b7280; }
+    .form-input { border: 1px solid var(--border); background: rgba(246,246,246,0.3); padding: 9px 12px; font-size: 13px; font-family: 'Poppins', sans-serif; color: var(--gray); border-radius: 4px; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--magenta); box-shadow: 0 0 0 3px rgba(214,29,107,0.1); }
 
-    .pbb { padding: 14px 24px 16px; flex: 1; }
-    .sprint-list { display: flex; flex-direction: column; gap: 5px; }
-    .sprint-row { display: flex; align-items: center; gap: 10px; }
-    .s-id { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-faint); width: 42px; flex-shrink: 0; }
-    .s-name { font-size: 12px; color: var(--ink-soft); width: 210px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .s-bar-wrap { flex: 1; height: 5px; background: var(--paper-dark); border-radius: 3px; overflow: hidden; }
-    .s-bar { height: 100%; border-radius: 3px; }
-    .s-pt { font-size: 11px; color: var(--ink-faint); width: 48px; text-align: right; flex-shrink: 0; }
+    /* PHASE TABLE */
+    .phase-table { width: 100%; border-collapse: collapse; }
+    .phase-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    .phase-table th:last-child { text-align: right; }
+    .phase-row { border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: pointer; text-decoration: none; display: table-row; color: inherit; }
+    .phase-row:hover { background: var(--bg); }
+    .phase-row td { padding: 14px; vertical-align: middle; }
+    .phase-accent { width: 3px; padding: 0 !important; }
+    .phase-name-cell { }
+    .phase-badge-pill { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 2px; margin-bottom: 3px; }
+    .phase-name-text { font-size: 14px; font-weight: 600; color: var(--navy); }
+    .phase-tagline { font-size: 12px; color: #9ca3af; }
+    .phase-table td.num { font-size: 14px; font-weight: 600; color: var(--gray); }
+    .phase-table td.cost { font-size: 14px; font-weight: 700; color: var(--navy); }
+    .phase-table td.action { text-align: right; }
+    .phase-detail-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--magenta); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.15s; }
+    .phase-detail-btn:hover { background: rgba(214,29,107,0.08); }
+    .phase-off { opacity: 0.4; }
 
-    .pbf { padding: 10px 24px; background: var(--paper); border-top: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--ink-soft); }
-    .pbf-arrow { font-size: 13px; color: var(--blue); font-weight: 600; }
+    /* SIDEBAR */
+    .sidebar { position: sticky; top: 80px; }
+    .cost-card { background: var(--white); padding: 24px; }
+    .cost-card-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .cost-row:last-of-type { border-bottom: none; }
+    .cost-row-label { color: #6b7280; font-weight: 500; }
+    .cost-row-value { font-weight: 700; color: var(--navy); }
+    .cost-total-box { margin-top: 16px; padding: 18px; background: var(--navy); border-radius: 4px; }
+    .cost-total-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
+    .cost-total-value { font-size: 28px; font-weight: 700; color: var(--white); line-height: 1; }
+    .cost-total-sub { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+    .cost-note { font-size: 11px; color: #9ca3af; margin-top: 14px; line-height: 1.5; }
 
-    /* TOTAL */
-    .total-section { background: white; border: 1px solid var(--rule); border-radius: 12px; padding: 28px; margin-bottom: 16px; }
-    .total-title { font-family: Georgia, serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
-    .metric { background: white; padding: 16px 20px; }
-    .metric.featured { background: var(--blue); }
-    .m-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 6px; }
-    .metric.featured .m-label { color: rgba(255,255,255,0.65); }
-    .m-value { font-family: Georgia, serif; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1; }
-    .metric.featured .m-value { color: white; }
-    .m-note { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
-    .metric.featured .m-note { color: rgba(255,255,255,0.5); }
+    /* MC CHART */
+    .chart-card { background: var(--white); padding: 24px; margin-top: 20px; }
+    .chart-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .chart-sub { font-size: 11px; color: #9ca3af; margin-bottom: 14px; }
+    .chart-wrap { height: 160px; position: relative; }
 
-    .chart-box { background: white; border: 1px solid var(--rule); border-radius: 12px; padding: 24px; }
-    .chart-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .chart-box p { font-size: 12px; color: var(--ink-faint); margin-bottom: 14px; }
-    .chart-wrap { height: 190px; position: relative; }
+    /* MC PERCENTILES */
+    .percentile-row { display: flex; gap: 1px; margin-top: 16px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+    .pct-box { flex: 1; padding: 12px 14px; background: var(--white); }
+    .pct-box.featured { background: var(--navy); }
+    .pct-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #9ca3af; margin-bottom: 4px; }
+    .pct-box.featured .pct-label { color: rgba(255,255,255,0.55); }
+    .pct-value { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .pct-box.featured .pct-value { color: var(--white); }
 
-    @media (max-width: 700px) {
-      .phases { grid-template-columns: 1fr; }
-      .phases .phase-box:first-child { grid-column: auto; }
+    /* FOOTER */
+    .site-footer { border-top: 1px solid var(--border); background: var(--white); padding: 20px 24px; text-align: center; font-size: 12px; color: #9ca3af; }
+    .site-footer a { color: #6b7280; text-decoration: none; margin: 0 10px; }
+    .site-footer a:hover { color: var(--magenta); }
+
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .main-cols { grid-template-columns: 1fr !important; }
+      .form-grid { grid-template-columns: 1fr; }
     }
-    @media (max-width: 620px) {
-      .s-name { width: 130px; }
-      .metrics { grid-template-columns: 1fr; }
-      .pbh { flex-direction: column; gap: 8px; }
-      .pbh-right { text-align: left; }
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .header-username { display: none; }
     }
   </style>
 </head>
 <body>
 
-<nav class="nav">
-  <div class="nav-brand">LOS V3 — Projektkalkulation</div>
-</nav>
-
-<div class="content">
-  <div class="page-header">
-    <div class="kicker">Leadership Operating System V3</div>
-    <h1>Ihr individuelles Angebot</h1>
-    <p>Klicken Sie auf eine Phase, um die enthaltenen Bausteine zu sehen und zu konfigurieren. Die Gesamtkosten aktualisieren sich automatisch.</p>
-  </div>
-
-  <div class="phases">
-
-    <a href="phase1.html" class="phase-box" id="box-p1">
-      <div class="pbh">
-        <div class="pbh-left">
-          <div class="phase-badge pb-1">Phase 1 · Immer enthalten</div>
-          <div class="phase-name">Das digitale Führungsprofil</div>
-          <div class="phase-tagline">Architektur, Rollen, Merkmalsprofil, Privacy</div>
-        </div>
-        <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
-          <div class="price-value" id="price-p1">—</div>
-          <div class="price-sub">wahrscheinlich</div>
-        </div>
-      </div>
-      <div class="pbb"><div class="sprint-list" id="list-p1"></div></div>
-      <div class="pbf"><span id="count-p1"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
-    </a>
-
-    <a href="phase-mon.html" class="phase-box" id="box-pmon">
-      <div class="pbh">
-        <div class="pbh-left">
-          <div class="phase-badge pb-mon" id="badge-pmon">Monetarisierung · Optional</div>
-          <div class="phase-name">Monetarisierung</div>
-          <div class="phase-tagline" id="tagline-pmon">Stripe-Anbindung, Abo-Pläne, Rechnungen &amp; Self-Service</div>
-        </div>
-        <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
-          <div class="price-value" id="price-pmon">—</div>
-          <div class="price-sub">wahrscheinlich</div>
-        </div>
-      </div>
-      <div class="pbb"><div class="sprint-list" id="list-pmon"></div></div>
-      <div class="pbf"><span id="count-pmon"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
-    </a>
-
-    <a href="phase2.html" class="phase-box" id="box-p2">
-      <div class="pbh">
-        <div class="pbh-left">
-          <div class="phase-badge pb-2" id="badge-p2">Phase 2</div>
-          <div class="phase-name">Zusammenarbeit &amp; Verbindlichkeit</div>
-          <div class="phase-tagline">Gespräche, Ziele, ToDos &amp; Vorlagen</div>
-        </div>
-        <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
-          <div class="price-value" id="price-p2">—</div>
-          <div class="price-sub">wahrscheinlich</div>
-        </div>
-      </div>
-      <div class="pbb"><div class="sprint-list" id="list-p2"></div></div>
-      <div class="pbf"><span id="count-p2"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
-    </a>
-
-    <a href="phase3.html" class="phase-box" id="box-p3">
-      <div class="pbh">
-        <div class="pbh-left">
-          <div class="phase-badge pb-3" id="badge-p3">Phase 3</div>
-          <div class="phase-name">KI-Erweiterung &amp; Go-Live</div>
-          <div class="phase-tagline">KI-Features, Datenmigration, Sicherheit &amp; Launch</div>
-        </div>
-        <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
-          <div class="price-value" id="price-p3">—</div>
-          <div class="price-sub">wahrscheinlich</div>
-        </div>
-      </div>
-      <div class="pbb"><div class="sprint-list" id="list-p3"></div></div>
-      <div class="pbf"><span id="count-p3"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
-    </a>
-
-  </div>
-
-  <div class="total-section">
-    <div class="total-title">Gesamtkosten — Monte-Carlo-Analyse</div>
-    <div class="metrics">
-      <div class="metric">
-        <div class="m-label">Optimistisch (P10)</div>
-        <div class="m-value" id="total-p10">—</div>
-        <div class="m-note">Günstiger realistischer Verlauf</div>
-      </div>
-      <div class="metric featured">
-        <div class="m-label">Planungswert (P50)</div>
-        <div class="m-value" id="total-p50">—</div>
-        <div class="m-note">Median aus 50.000 Simulationen</div>
-      </div>
-      <div class="metric">
-        <div class="m-label">Konservativ (P90)</div>
-        <div class="m-value" id="total-p90">—</div>
-        <div class="m-note">Puffer für unbekannte Risiken</div>
+<header class="site-header">
+  <div class="site-header-inner">
+    <img src="logo.png" alt="Ratwerk" class="header-logo" onerror="this.style.display='none'">
+    <span class="header-title">LOS V3 — Projektkalkulation</span>
+    <div class="header-right">
+      <button class="header-icon-btn" title="Benachrichtigungen">
+        <i data-lucide="bell" style="width:18px;height:18px"></i>
+      </button>
+      <div class="header-user">
+        <span class="header-username">Moni</span>
+        <div class="header-avatar">M</div>
       </div>
     </div>
   </div>
+</header>
 
-  <div class="chart-box">
-    <h3>Wahrscheinlichkeitsverteilung der Gesamtkosten</h3>
-    <p>50.000 Monte-Carlo-Simulationen · Dreiecksverteilung pro Baustein</p>
-    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+<div class="main-wrap">
+
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:28px">
+    <div>
+      <div class="page-title">Ihr individuelles Angebot</div>
+      <div class="page-sub">Klicken Sie auf eine Phase für Details und Konfiguration</div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap">
+      <button class="btn btn-outline"><i data-lucide="save" style="width:14px;height:14px"></i> Speichern</button>
+      <button class="btn btn-outline"><i data-lucide="file-text" style="width:14px;height:14px"></i> PDF Export</button>
+      <button class="btn btn-primary"><i data-lucide="send" style="width:14px;height:14px"></i> Angebot senden</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-icon"><i data-lucide="clock" style="width:22px;height:22px"></i></div>
+      <div class="stat-label">Geschätzter Aufwand</div>
+      <div class="stat-value" id="stat-hours">—</div>
+      <div class="stat-note">Wahrscheinlicher Wert</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon"><i data-lucide="euro" style="width:22px;height:22px"></i></div>
+      <div class="stat-label">Planungswert</div>
+      <div class="stat-value" id="stat-cost">—</div>
+      <div class="stat-note">Median · 50.000 Simulationen</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon"><i data-lucide="layers" style="width:22px;height:22px"></i></div>
+      <div class="stat-label">Aktive Phasen</div>
+      <div class="stat-value" id="stat-phases">—</div>
+      <div class="stat-note">von 4 verfügbaren Phasen</div>
+    </div>
+  </div>
+
+  <!-- MAIN COLS -->
+  <div class="main-cols" style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; align-items:start">
+
+    <!-- LEFT -->
+    <div>
+      <!-- PROJEKTDATEN -->
+      <div class="section-card">
+        <div class="section-card-title">
+          <i data-lucide="folder" style="width:16px;height:16px;color:var(--magenta)"></i>
+          Projektdaten
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Projektname</label>
+            <input class="form-input" type="text" placeholder="Leadership Operating System V3" id="proj-name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mandant / Kunde</label>
+            <input class="form-input" type="text" placeholder="Kundenname" id="proj-client">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Projekt-ID</label>
+            <input class="form-input" type="text" placeholder="LOS-2026-001" id="proj-id">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kalkulationsdatum</label>
+            <input class="form-input" type="date" id="proj-date">
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASEN TABELLE -->
+      <div class="section-card" style="padding:0; overflow:hidden">
+        <div style="padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px">
+          <i data-lucide="layout-list" style="width:16px;height:16px;color:var(--magenta)"></i>
+          <span class="section-card-title" style="margin:0">Phasen &amp; Leistungen</span>
+        </div>
+        <table class="phase-table">
+          <thead>
+            <tr>
+              <th style="width:4px;padding:10px 0"></th>
+              <th>Phase / Leistung</th>
+              <th>Stunden</th>
+              <th>Stundensatz</th>
+              <th>Gesamt</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="phase-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="sidebar">
+      <div class="cost-card">
+        <div class="cost-card-title">
+          <i data-lucide="calculator" style="width:16px;height:16px;color:var(--magenta)"></i>
+          Kostenübersicht
+        </div>
+        <div class="cost-row">
+          <span class="cost-row-label">Optimistisch (P10)</span>
+          <span class="cost-row-value" id="side-p10">—</span>
+        </div>
+        <div class="cost-row">
+          <span class="cost-row-label">Planungswert (P50)</span>
+          <span class="cost-row-value" id="side-p50">—</span>
+        </div>
+        <div class="cost-row">
+          <span class="cost-row-label">Konservativ (P90)</span>
+          <span class="cost-row-value" id="side-p90">—</span>
+        </div>
+        <div class="cost-total-box">
+          <div class="cost-total-label">Planungswert</div>
+          <div class="cost-total-value" id="side-total">—</div>
+          <div class="cost-total-sub">Median aus 50.000 Simulationen</div>
+        </div>
+        <div class="cost-note">
+          Alle Angaben basieren auf einer Monte-Carlo-Simulation mit Dreiecksverteilung. Konfigurieren Sie die Phasen für ein angepasstes Ergebnis.
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">Wahrscheinlichkeitsverteilung</div>
+        <div class="chart-sub">50.000 Monte-Carlo-Simulationen</div>
+        <div class="chart-wrap"><canvas id="chart"></canvas></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
+<footer class="site-footer">
+  <div>
+    &copy; 2026 Ratwerk
+    <a href="#">Impressum</a>
+    <a href="#">Datenschutz</a>
+    <a href="#">Support</a>
+  </div>
+</footer>
+
 <script src="shared.js"></script>
 <script>
-const COLORS = { 1: '#2D5BE3', 2: '#16A34A', 3: '#7C3AED', 4: '#D97706' };
+lucide.createIcons();
 
-function renderList(phase, state, suffix) {
-  const id = suffix || phase;
-  const active = Object.entries(STORIES).filter(([k, s]) => s.phase === phase && isActive(k, s, state));
-  const maxPT = Math.max(...active.map(([, s]) => s.likely / 8), 1);
-  const container = document.getElementById(`list-p${id}`);
-  container.innerHTML = active.map(([, s]) => {
-    const pt = s.likely / 8;
-    const pct = (pt / maxPT * 100).toFixed(0);
-    return `<div class="sprint-row">
-      <span class="s-id">${s.id}</span>
-      <span class="s-name">${s.name}</span>
-      <div class="s-bar-wrap"><div class="s-bar" style="width:${pct}%;background:${COLORS[phase]}"></div></div>
-      <span class="s-pt">${fmtPT(s.likely)}</span>
-    </div>`;
-  }).join('');
-  document.getElementById(`count-p${id}`).textContent = `${active.length} Bausteine`;
-}
+const PHASE_CONFIG = [
+  { phase: 1, id: 'p1', href: 'phase1.html', name: 'Das digitale Führungsprofil', tagline: 'Architektur, Rollen, Merkmalsprofil, Privacy', color: '#2563eb', bg: '#eff6ff', always: true },
+  { phase: 4, id: 'pmon', href: 'phase-mon.html', name: 'Monetarisierung', tagline: 'Stripe, Abo-Pläne, Rechnungen & Self-Service', color: '#d97706', bg: '#fffbeb', stateKey: 'phase4' },
+  { phase: 2, id: 'p2', href: 'phase2.html', name: 'Zusammenarbeit & Verbindlichkeit', tagline: 'Gespräche, Ziele, ToDos & Vorlagen', color: '#16a34a', bg: '#f0fdf4', stateKey: 'phase2' },
+  { phase: 3, id: 'p3', href: 'phase3.html', name: 'KI-Erweiterung & Go-Live', tagline: 'KI-Features, Datenmigration, Sicherheit & Launch', color: '#7c3aed', bg: '#f5f3ff', stateKey: 'phase3' },
+];
 
 let chartInst = null;
+
+function fmtHours(h) { return Math.round(h) + ' h'; }
+
+function renderTable(state) {
+  const tbody = document.getElementById('phase-tbody');
+  tbody.innerHTML = PHASE_CONFIG.map(cfg => {
+    const on = cfg.always || !!state[cfg.stateKey];
+    const likely = phaseLikely(cfg.phase, state);
+    const hours = Math.round(likely / RATE);
+    return `<tr class="phase-row${on ? '' : ' phase-off'}" onclick="location.href='${cfg.href}'" style="cursor:pointer">
+      <td class="phase-accent" style="background:${cfg.color};width:4px;padding:0"></td>
+      <td class="phase-name-cell">
+        <div class="phase-name-text">${cfg.name}</div>
+        <div class="phase-tagline">${cfg.tagline}${!on ? ' · <span style="color:var(--magenta)">Nicht enthalten</span>' : ''}</div>
+      </td>
+      <td class="num">${on ? hours + ' h' : '—'}</td>
+      <td class="num">200 €/h</td>
+      <td class="cost">${on ? fmt(likely) : '—'}</td>
+      <td class="action">
+        <button class="phase-detail-btn" onclick="event.stopPropagation();location.href='${cfg.href}'">
+          Details <i data-lucide="chevron-right" style="width:13px;height:13px"></i>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
 function renderChart(sorted, p10, p50, p90) {
-  const bins = 40, min = sorted[0], max = sorted[sorted.length-1], step = (max-min)/bins;
+  const bins = 40, min = sorted[0], max = sorted[sorted.length - 1], step = (max - min) / bins;
   const counts = new Array(bins).fill(0), labels = [];
   for (let i = 0; i < bins; i++) labels.push(Math.round(min + i * step));
-  for (const v of sorted) counts[Math.min(Math.floor((v-min)/step), bins-1)]++;
+  for (const v of sorted) counts[Math.min(Math.floor((v - min) / step), bins - 1)]++;
   const ctx = document.getElementById('chart').getContext('2d');
   if (chartInst) chartInst.destroy();
   chartInst = new Chart(ctx, {
     type: 'bar',
-    data: { labels: labels.map(v => fmt(v)), datasets: [{ data: counts, borderWidth: 0, borderRadius: 2,
-      backgroundColor: labels.map(v => v < p10 ? 'rgba(45,91,227,0.2)' : v < p50 ? 'rgba(45,91,227,0.55)' : v < p90 ? 'rgba(45,91,227,0.35)' : 'rgba(45,91,227,0.15)') }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { ticks: { maxTicksLimit: 8, callback: (v, i) => i % 5 === 0 ? fmt(labels[i]) : null, font: { size: 10 } }, grid: { display: false } },
-                y: { ticks: { display: false }, grid: { color: '#F0EDE5' } } } }
+    data: {
+      labels: labels.map(v => fmt(v)),
+      datasets: [{
+        data: counts, borderWidth: 0, borderRadius: 2,
+        backgroundColor: labels.map(v => v < p10 ? 'rgba(214,29,107,0.15)' : v < p50 ? 'rgba(214,29,107,0.6)' : v < p90 ? 'rgba(214,29,107,0.35)' : 'rgba(214,29,107,0.12)')
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { maxTicksLimit: 6, callback: (v, i) => i % 7 === 0 ? fmt(labels[i]) : null, font: { size: 9, family: 'Poppins' } }, grid: { display: false } },
+        y: { ticks: { display: false }, grid: { color: '#f3f4f6' } }
+      }
+    }
   });
 }
 
 function render() {
   const state = loadState();
-  [1, 2, 3].forEach(p => {
-    renderList(p, state);
-    document.getElementById(`price-p${p}`).textContent = fmt(phaseLikely(p, state));
-  });
-  renderList(4, state, 'mon');
-  document.getElementById('price-pmon').textContent = fmt(phaseLikely(4, state));
-  const posLabel = state.mon_position === 'p2' ? 'nach Phase 2' : 'nach Phase 1';
-  document.getElementById('tagline-pmon').textContent = `Einplanung ${posLabel} · Stripe, Abo-Pläne, Rechnungen & Self-Service`;
-  if (!state.phase4) { document.getElementById('badge-pmon').textContent = 'Monetarisierung · Nicht enthalten'; document.getElementById('box-pmon').classList.add('off'); }
-  if (!state.phase2) { document.getElementById('badge-p2').textContent = 'Phase 2 · Nicht enthalten'; document.getElementById('box-p2').classList.add('off'); }
-  if (!state.phase3) { document.getElementById('badge-p3').textContent = 'Phase 3 · Nicht enthalten'; document.getElementById('box-p3').classList.add('off'); }
+  renderTable(state);
 
   const active = Object.entries(STORIES).filter(([k, s]) => isActive(k, s, state)).map(([, s]) => s);
   if (!active.length) return;
+
+  const totalHours = active.reduce((s, x) => s + x.likely, 0);
+  const activePhases = PHASE_CONFIG.filter(cfg => cfg.always || !!state[cfg.stateKey]).length;
+
   const sorted = simulate(active);
   const p10 = percentile(sorted, 10), p50 = percentile(sorted, 50), p90 = percentile(sorted, 90);
-  document.getElementById('total-p10').textContent = fmt(p10);
-  document.getElementById('total-p50').textContent = fmt(p50);
-  document.getElementById('total-p90').textContent = fmt(p90);
+
+  document.getElementById('stat-hours').textContent = fmtHours(totalHours);
+  document.getElementById('stat-cost').textContent = fmt(p50);
+  document.getElementById('stat-phases').textContent = activePhases;
+  document.getElementById('side-p10').textContent = fmt(p10);
+  document.getElementById('side-p50').textContent = fmt(p50);
+  document.getElementById('side-p90').textContent = fmt(p90);
+  document.getElementById('side-total').textContent = fmt(p50);
+
   renderChart(sorted, p10, p50, p90);
+}
+
+// Projektdaten aus localStorage
+const PROJ_KEYS = ['proj-name', 'proj-client', 'proj-id', 'proj-date'];
+PROJ_KEYS.forEach(id => {
+  const el = document.getElementById(id);
+  el.value = localStorage.getItem(id) || '';
+  el.addEventListener('input', () => localStorage.setItem(id, el.value));
+});
+// Default date
+if (!document.getElementById('proj-date').value) {
+  document.getElementById('proj-date').value = new Date().toISOString().split('T')[0];
 }
 
 render();
@@ -275,4 +398,3 @@ window.addEventListener('pageshow', render);
 </script>
 </body>
 </html>
-
