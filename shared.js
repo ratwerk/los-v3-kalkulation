@@ -45,7 +45,7 @@ const STORIES = {
     desc:'Gleiche Split-Logik wie beim Sprachmuster: Übersicht links, Bearbeitung rechts. Setzt Split-Layout bei Sprachmuster voraus.',
     steps:['Split-Komponente aus Sprachmuster wiederverwenden','Führungsleitfaden-Felder integrieren','Navigation konsistent mit Sprachmuster'] },
 
-  p1_hints:     { phase:1, min:6,  likely:10, max:16, type:'required',
+  p1_hints:     { phase:1, min:6,  likely:10, max:16, type:'toggle', stateKey:'p1_hints', defaultOn:true,
     id:'US-06', name:'Führungshinweise & Stolpersteine',
     desc:'Persönliche Notizen der Führungskraft zum Umgang mit der Person: Stärken im Alltag, Stolpersteine, Kommunikationshinweise. Privacy-Einstellung pro Eintrag.',
     steps:['Notizen-Modul pro Person aufbauen','Privacy-Einstellung: privat oder für Team sichtbar','Systemhinweise aus Metaprogrammen einblenden','DSGVO-konforme Dokumentation'] },
@@ -160,7 +160,7 @@ const DEFAULT_STATE = {
   phase2: true, phase3: true,
   meta: 'std', leit: 'std',
   p1_orgchart: false,
-  p1_vers: true, p1_qr: true,
+  p1_hints: true, p1_vers: true, p1_qr: true,
   p2_prep: true, p2_align: true, p2_final: true, p2_goals: true, p2_todos: true, p2_tmpl: true,
   p3_anon: true, p3_ki_meta: true, p3_staerken: true, p3_ki_hints: false, p3_smart: false,
   p3_chat: true, p3_migration: true, p3_audit: true, p3_crypt: true, p3_launch: true,
