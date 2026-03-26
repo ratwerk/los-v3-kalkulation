@@ -184,6 +184,11 @@ const STORIES = {
     id:'MON-06', name:'Admin-Dashboard Abrechnung',
     desc:'Übersicht aller aktiven Abonnements, Zahlungsstatus und Umsatz. Direkt-Links ins Stripe Dashboard für manuelle Eingriffe.',
     steps:['Abonnement-Übersicht im Admin-Bereich','Zahlungsstatus und nächste Fälligkeit anzeigen','Direkt-Link ins Stripe Dashboard','Manuelle Aktionen: Abo pausieren, Rabatt gewähren'] },
+
+  mon_ki_billing: { phase:4, min:4, likely:8, max:14, type:'toggle', stateKey:'mon_ki_billing', defaultOn:false, kiAuto:true,
+    id:'MON-07', name:'KI-Nutzungsabrechnung',
+    desc:'KI-API-Kosten pro Mandant tracken und im Abo-Modell berücksichtigen. Usage-Limits pro Plan, Überschreitungswarnung und optionale verbrauchsbasierte Abrechnung.',
+    steps:['KI-API-Calls pro Mandant protokollieren','Usage-Dashboard im Admin-Bereich','Limits pro Abo-Plan definieren','Alert bei Annäherung ans Limit'] },
 };
 
 // ── STATE ────────────────────────────────────────────────────────────────────
@@ -196,7 +201,7 @@ const DEFAULT_STATE = {
   p3_anon: true, p3_ki_meta: true, p3_staerken: true, p3_ki_hints: false, p3_smart: false,
   p3_chat: true, p3_migration: true, p3_audit: true, p3_crypt: true, p3_launch: true,
   mon_position: 'p1',
-  mon_stripe: true, mon_checkout: true, mon_portal: true, mon_invoices: true, mon_webhook: true, mon_admin: true,
+  mon_stripe: true, mon_checkout: true, mon_portal: true, mon_invoices: true, mon_webhook: true, mon_admin: true, mon_ki_billing: false,
 };
 
 function loadState() {
@@ -223,6 +228,10 @@ function isActive(key, s, state) {
     // US-20 (kiBase): required if any ki feature is active in phase 3
     if (s.kiBase) {
       const kiActive = Object.entries(STORIES).some(([k2, s2]) => s2.kiFeature && state[`phase${s2.phase}`] && state[s2.stateKey]);
+      return phaseOn && (state[s.stateKey] || kiActive);
+    }
+    if (s.kiAuto) {
+      const kiActive = Object.entries(STORIES).some(([k2, s2]) => s2.kiFeature && state.phase3 && state[s2.stateKey]);
       return phaseOn && (state[s.stateKey] || kiActive);
     }
     return phaseOn && state[s.stateKey];
