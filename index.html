@@ -96,7 +96,6 @@
 
 <nav class="nav">
   <div class="nav-brand">LOS V3 — Projektkalkulation</div>
-  <div class="nav-total" id="nav-total">wird berechnet …</div>
 </nav>
 
 <div class="content">
@@ -244,7 +243,6 @@ function render() {
   document.getElementById('total-p10').textContent = fmt(p10);
   document.getElementById('total-p50').textContent = fmt(p50);
   document.getElementById('total-p90').textContent = fmt(p90);
-  document.getElementById('nav-total').textContent = `Gesamt: ${fmt(p50)}`;
   renderChart(sorted, p10, p50, p90);
 }
 
