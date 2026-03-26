@@ -32,7 +32,7 @@
     .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 40px; }
     .phases .phase-box:first-child { grid-column: 1 / -1; }
 
-    .phase-box { display: block; background: white; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.1s; }
+    .phase-box { display: flex; flex-direction: column; background: white; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.1s; }
     .phase-box:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); transform: translateY(-1px); }
     .phase-box.off { opacity: 0.5; }
 
@@ -50,7 +50,7 @@
     .price-value { font-family: Georgia, serif; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
     .price-sub { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
 
-    .pbb { padding: 14px 24px 16px; }
+    .pbb { padding: 14px 24px 16px; flex: 1; }
     .sprint-list { display: flex; flex-direction: column; gap: 5px; }
     .sprint-row { display: flex; align-items: center; gap: 10px; }
     .s-id { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-faint); width: 42px; flex-shrink: 0; }
