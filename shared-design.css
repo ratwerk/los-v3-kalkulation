@@ -12,14 +12,14 @@
   --border: #e5e7eb;
   --border-dark: #d1d5db;
   --bg-subtle: #f3f4f6;
-  --rule: var(--border);
+  --rule: var(--navy);
 }
 
 *, *::before, *::after { font-family: 'Poppins', sans-serif !important; box-sizing: border-box; }
 body { background: var(--bg) !important; color: var(--text) !important; }
 
 /* HEADER */
-.site-header { position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 1px solid var(--border); }
+.site-header { position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 1px solid var(--navy); }
 .site-header-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 14px; }
 .header-logo { position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 34px; width: auto; }
 .nav-back { font-size: 13px; color: var(--magenta) !important; text-decoration: none; font-weight: 600; }
@@ -39,10 +39,10 @@ body { background: var(--bg) !important; color: var(--text) !important; }
 .kicker { color: var(--magenta) !important; }
 
 /* CARDS */
-.story-card { border-radius: 4px !important; border-color: var(--border) !important; }
-.choice-group { border-radius: 4px !important; border-color: var(--border) !important; }
-.phase-total { border-radius: 4px !important; border-color: var(--border) !important; background: var(--white) !important; }
-.phase-switch { border-radius: 4px !important; border-color: var(--border) !important; background: var(--white) !important; }
+.story-card { border-radius: 4px !important; border-color: var(--navy) !important; }
+.choice-group { border-radius: 4px !important; border-color: var(--navy) !important; }
+.phase-total { border-radius: 4px !important; border-color: var(--navy) !important; background: var(--white) !important; }
+.phase-switch { border-radius: 4px !important; border-color: var(--navy) !important; background: var(--white) !important; }
 
 /* SECTION LABELS */
 .section-label { color: var(--text-faint) !important; }
@@ -50,9 +50,9 @@ body { background: var(--bg) !important; color: var(--text) !important; }
 /* PAPER OVERRIDES */
 .pbb, .pbf, .sc-pt, .sc-steps { background: var(--bg-subtle) !important; }
 .sc-steps { background: transparent !important; }
-.sc-pt { background: var(--bg-subtle) !important; border-top-color: var(--border) !important; }
-.cg-label { background: var(--bg-subtle) !important; border-bottom-color: var(--border) !important; color: var(--text-faint) !important; }
-.choice-opt { border-bottom-color: var(--border) !important; border-right-color: var(--border) !important; }
+.sc-pt { background: var(--bg-subtle) !important; border-top-color: var(--navy) !important; }
+.cg-label { background: var(--bg-subtle) !important; border-bottom-color: var(--navy) !important; color: var(--text-faint) !important; }
+.choice-opt { border-bottom-color: var(--navy) !important; border-right-color: var(--navy) !important; }
 .choice-opt:hover { background: var(--bg) !important; }
 
 /* TOGGLE */
