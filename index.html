@@ -14,12 +14,12 @@
   <style>
     :root {
       --magenta: #d61d6b;
-      --navy: #1b2d42;
+      --navy: #003862;
       --bg: #f6f6f6;
       --white: #ffffff;
       --gray: #363636;
       --border: #e5e7eb;
-      --blue: #1b2d42; --blue-bg: #ebeef2;
+      --blue: #003862; --blue-bg: #e6edf3;
       --green: #16a34a; --green-bg: #f0fdf4;
       --purple: #7c3aed; --purple-bg: #f5f3ff;
       --amber: #d97706; --amber-bg: #fffbeb;
@@ -53,11 +53,11 @@
     .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 3px; }
     .stat-value { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1; }
     .stat-note { font-size: 11px; color: #9ca3af; margin-top: 3px; }
-    .stat-box.featured { background: #ebeef2; border-top-color: var(--navy); }
+    .stat-box.featured { background: #e6edf3; border-top-color: var(--navy); }
     .stat-box.featured .stat-icon { color: var(--navy); }
-    .stat-box.featured .stat-label { color: rgba(27,45,66,0.55); }
+    .stat-box.featured .stat-label { color: rgba(0,56,98,0.55); }
     .stat-box.featured .stat-value { color: var(--navy); }
-    .stat-box.featured .stat-note { color: rgba(27,45,66,0.45); }
+    .stat-box.featured .stat-note { color: rgba(0,56,98,0.45); }
 
     /* PHASE BOXES */
     .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
@@ -306,7 +306,7 @@
 <script>
 lucide.createIcons();
 
-const COLORS = { 1: '#1b2d42', 2: '#16a34a', 3: '#7c3aed', 4: '#d97706' };
+const COLORS = { 1: '#003862', 2: '#16a34a', 3: '#7c3aed', 4: '#d97706' };
 
 function renderList(phase, state, suffix) {
   const id = suffix || phase;
