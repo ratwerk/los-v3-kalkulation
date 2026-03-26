@@ -7,7 +7,7 @@
 @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 800; font-display: swap; src: url('fonts/Poppins-800.woff2') format('woff2'); }
 
 :root {
-  --navy: #003862;
+  --navy: #4d7491;
   --magenta: #d61d6b;
   --bg: #f6f6f6;
   --white: #ffffff;

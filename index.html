@@ -17,12 +17,12 @@
     @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 800; font-display: swap; src: url('fonts/Poppins-800.woff2') format('woff2'); }
     :root {
       --magenta: #d61d6b;
-      --navy: #003862;
+      --navy: #4d7491;
       --bg: #f6f6f6;
       --white: #ffffff;
       --gray: #363636;
       --border: #e5e7eb;
-      --blue: #003862; --blue-bg: #e6edf3;
+      --blue: #4d7491; --blue-bg: #e6edf3;
       --green: #16a34a; --green-bg: #f0fdf4;
       --purple: #7c3aed; --purple-bg: #f5f3ff;
       --amber: #d97706; --amber-bg: #fffbeb;
@@ -120,7 +120,7 @@
 
     /* BUTTONS */
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px; transition: all 0.2s; border: none; font-family: 'Poppins', sans-serif; }
-    .btn-outline { background: var(--white); border: 1.5px solid #003862; color: #003862; }
+    .btn-outline { background: var(--white); border: 1.5px solid #4d7491; color: #4d7491; }
     .btn-outline:hover { background: var(--bg); }
     .btn-primary { background: var(--magenta); color: var(--white); box-shadow: 0 2px 8px rgba(214,29,107,0.25); }
     .btn-primary:hover { background: #b8185c; }
@@ -299,7 +299,7 @@
 <script>
 lucide.createIcons();
 
-const COLORS = { 1: '#003862', 2: '#16a34a', 3: '#7c3aed', 4: '#d97706' };
+const COLORS = { 1: '#4d7491', 2: '#16a34a', 3: '#7c3aed', 4: '#d97706' };
 
 function renderList(phase, state, suffix) {
   const id = suffix || phase;
