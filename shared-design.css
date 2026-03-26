@@ -1,0 +1,73 @@
+/* === SHARED DESIGN — LOS V3 === */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --navy: #1b2d42;
+  --magenta: #d61d6b;
+  --bg: #f6f6f6;
+  --white: #ffffff;
+  --text: #363636;
+  --text-soft: #4b5563;
+  --text-faint: #9ca3af;
+  --border: #e5e7eb;
+  --border-dark: #d1d5db;
+  --bg-subtle: #f3f4f6;
+}
+
+*, *::before, *::after { font-family: 'Poppins', sans-serif !important; box-sizing: border-box; }
+body { background: var(--bg) !important; color: var(--text) !important; }
+
+/* HEADER */
+.site-header { position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 1px solid var(--border); }
+.site-header-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 14px; }
+.header-logo { height: 34px; width: auto; flex-shrink: 0; }
+.nav-back { font-size: 13px; color: var(--magenta) !important; text-decoration: none; font-weight: 600; }
+.nav-back:hover { text-decoration: underline; }
+.nav-title { font-size: 13px; color: var(--text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.nav-total { font-size: 13px; font-weight: 700; color: var(--navy); }
+.header-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--magenta); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* CONTENT */
+.content { background: var(--bg) !important; }
+
+/* PHASE HEADER */
+.phase-header { background: var(--bg) !important; border-bottom: 1px solid var(--border) !important; }
+.phase-header h1 { color: var(--navy) !important; }
+.phase-badge { border-radius: 2px !important; font-family: 'Poppins', sans-serif !important; }
+.kicker { color: var(--magenta) !important; }
+
+/* CARDS */
+.story-card { border-radius: 4px !important; border-color: var(--border) !important; }
+.choice-group { border-radius: 4px !important; border-color: var(--border) !important; }
+.phase-total { border-radius: 4px !important; border-color: var(--border) !important; background: var(--white) !important; }
+.phase-switch { border-radius: 4px !important; border-color: var(--border) !important; background: var(--white) !important; }
+
+/* SECTION LABELS */
+.section-label { color: var(--text-faint) !important; }
+
+/* PAPER OVERRIDES */
+.pbb, .pbf, .sc-pt, .sc-steps { background: var(--bg-subtle) !important; }
+.sc-steps { background: transparent !important; }
+.sc-pt { background: var(--bg-subtle) !important; border-top-color: var(--border) !important; }
+.cg-label { background: var(--bg-subtle) !important; border-bottom-color: var(--border) !important; color: var(--text-faint) !important; }
+.choice-opt { border-bottom-color: var(--border) !important; }
+.choice-opt:hover { background: var(--bg) !important; }
+
+/* TOGGLE */
+.toggle { background: var(--border-dark) !important; }
+.toggle.on { background: var(--phase) !important; }
+
+/* PHASE TOTAL BOX */
+.ptv-label { color: var(--text-faint) !important; }
+.ptv-value { color: var(--navy) !important; }
+.ptv.featured .ptv-value { color: var(--phase) !important; }
+
+/* SEGMENTED CONTROL (Mon page) */
+.pos-opt { font-family: 'Poppins', sans-serif !important; }
+.pos-opt.selected { background: var(--phase) !important; color: white !important; }
+
+/* FOOTER */
+.site-footer { border-top: 1px solid var(--border); background: var(--white); padding: 18px 24px; text-align: center; font-size: 12px; color: var(--text-faint); margin-top: 0; }
+.site-footer a { color: var(--text-soft); text-decoration: none; margin: 0 8px; }
+.site-footer a:hover { color: var(--magenta); }
