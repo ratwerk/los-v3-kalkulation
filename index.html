@@ -8,6 +8,7 @@
   <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Poppins', 'sans-serif'] } } } }</script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 300; font-display: swap; src: url('fonts/Poppins-300.woff2') format('woff2'); }
     @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/Poppins-400.woff2') format('woff2'); }
@@ -72,14 +73,14 @@
     .phase-box.pb-blue  { border-top-color: var(--blue); }
     .phase-box.pb-green { border-top-color: var(--green); }
     .phase-box.pb-purple { border-top-color: var(--purple); }
-    .phase-box.pb-amber { border-top-color: var(--amber); }
+    .phase-box.pb-amber { border-top-color: var(--magenta); }
 
     .pbh { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
     .phase-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 2px; margin-bottom: 5px; }
     .badge-blue   { background: var(--blue-bg);   color: var(--blue); }
     .badge-green  { background: var(--green-bg);  color: var(--green); }
     .badge-purple { background: var(--purple-bg); color: var(--purple); }
-    .badge-amber  { background: var(--amber-bg);  color: var(--amber); }
+    .badge-amber  { background: rgba(214,29,107,0.08); color: var(--magenta); }
 
     .phase-name { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
     .phase-tagline { font-size: 12px; color: #9ca3af; }
@@ -130,6 +131,29 @@
     .site-footer a { color: #6b7280; text-decoration: none; margin: 0 8px; }
     .site-footer a:hover { color: var(--magenta); }
 
+    /* MODAL */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 500; align-items: center; justify-content: center; padding: 24px; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: var(--white); width: 100%; max-width: 460px; border-radius: 6px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .modal-close { background: none; border: none; cursor: pointer; color: #9ca3af; padding: 4px; display: flex; align-items: center; border-radius: 4px; transition: color 0.15s; }
+    .modal-close:hover { color: var(--navy); }
+    .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-summary { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; font-size: 12px; color: #6b7280; line-height: 1.7; }
+    .modal-summary strong { color: var(--navy); font-weight: 700; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11px; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: 0.06em; }
+    .form-input { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 4px; font-size: 13px; font-family: 'Poppins', sans-serif; color: var(--gray); outline: none; transition: border-color 0.15s; }
+    .form-input:focus { border-color: var(--navy); }
+    .form-input::placeholder { color: #c0c8d0; }
+    textarea.form-input { resize: vertical; min-height: 80px; }
+    .modal-footer { padding: 14px 24px 20px; display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--navy); color: white; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 600; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
     @media (max-width: 700px) {
       .phases { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: 1fr; }
@@ -147,9 +171,9 @@
     <img src="logo.png" alt="Ratwerk" class="header-logo" onerror="this.style.display='none'">
     <span class="header-title">LOS V3 — Projektkalkulation</span>
     <div class="header-right">
-      <button class="btn btn-outline"><i data-lucide="save" style="width:13px;height:13px"></i> Speichern</button>
-      <button class="btn btn-outline"><i data-lucide="file-text" style="width:13px;height:13px"></i> PDF Export</button>
-      <button class="btn btn-primary"><i data-lucide="send" style="width:13px;height:13px"></i> Angebot senden</button>
+      <button class="btn btn-outline" id="btn-save"><i data-lucide="save" style="width:13px;height:13px"></i> Speichern</button>
+      <button class="btn btn-outline" id="btn-pdf"><i data-lucide="file-text" style="width:13px;height:13px"></i> PDF Export</button>
+      <button class="btn btn-primary" id="btn-send"><i data-lucide="send" style="width:13px;height:13px"></i> Angebot senden</button>
     </div>
   </div>
 </header>
@@ -288,6 +312,38 @@
   </div>
 </div>
 
+<!-- SEND MODAL -->
+<div class="modal-backdrop" id="send-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Angebot senden</span>
+      <button class="modal-close" id="modal-close"><i data-lucide="x" style="width:16px;height:16px"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-summary" id="modal-summary"></div>
+      <div class="form-group">
+        <label class="form-label">Name des Empfängers</label>
+        <input class="form-input" id="field-name" type="text" placeholder="z. B. Dr. Müller">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-Mail-Adresse</label>
+        <input class="form-input" id="field-email" type="email" placeholder="empfaenger@beispiel.de">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notiz (optional)</label>
+        <textarea class="form-input" id="field-note" placeholder="Persönliche Nachricht zum Angebot…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="modal-cancel">Abbrechen</button>
+      <button class="btn btn-primary" id="modal-submit"><i data-lucide="send" style="width:13px;height:13px"></i> E-Mail öffnen</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <footer class="site-footer">
   <span style="color:var(--navy);font-weight:700;">LOS V3</span> &nbsp;·&nbsp; &copy; 2026 Ratwerk &nbsp;·&nbsp;
   <a href="#">Impressum</a>
@@ -299,7 +355,7 @@
 <script>
 lucide.createIcons();
 
-const COLORS = { 1: '#4d7491', 2: '#16a34a', 3: '#7c3aed', 4: '#d97706' };
+const COLORS = { 1: '#4d7491', 2: '#16a34a', 3: '#7c3aed', 4: '#d61d6b' };
 
 function renderList(phase, state, suffix) {
   const id = suffix || phase;
@@ -374,6 +430,105 @@ function render() {
 
 render();
 window.addEventListener('pageshow', render);
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── SPEICHERN → JSON Download ──────────────────────────────────────
+document.getElementById('btn-save').addEventListener('click', () => {
+  const state = loadState();
+  const active = Object.entries(STORIES).filter(([k, s]) => isActive(k, s, state)).map(([, s]) => s);
+  const sorted = active.length ? simulate(active) : [];
+  const p50 = sorted.length ? percentile(sorted, 50) : 0;
+  const payload = {
+    exportiert: new Date().toISOString(),
+    planungswert_p50_eur: p50,
+    konfiguration: state
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `LOS-V3-Konfiguration-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Konfiguration heruntergeladen');
+});
+
+// ── PDF Export ─────────────────────────────────────────────────────
+document.getElementById('btn-pdf').addEventListener('click', () => {
+  const btn = document.getElementById('btn-pdf');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader" style="width:13px;height:13px"></i> Wird erstellt…';
+  lucide.createIcons();
+  html2pdf().set({
+    margin: [10, 10, 10, 10],
+    filename: `LOS-V3-Angebot-${new Date().toISOString().slice(0, 10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.97 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(document.querySelector('.content')).save().then(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="file-text" style="width:13px;height:13px"></i> PDF Export';
+    lucide.createIcons();
+    showToast('PDF gespeichert');
+  });
+});
+
+// ── ANGEBOT SENDEN → Modal ─────────────────────────────────────────
+function openSendModal() {
+  const state = loadState();
+  const active = Object.entries(STORIES).filter(([k, s]) => isActive(k, s, state)).map(([, s]) => s);
+  const sorted = active.length ? simulate(active) : [];
+  const p10 = sorted.length ? percentile(sorted, 10) : 0;
+  const p50 = sorted.length ? percentile(sorted, 50) : 0;
+  const p90 = sorted.length ? percentile(sorted, 90) : 0;
+  const phases = ['Phase 1', state.phase4 && 'Monetarisierung', state.phase2 && 'Phase 2', state.phase3 && 'Phase 3'].filter(Boolean).join(', ');
+  document.getElementById('modal-summary').innerHTML =
+    `<strong>Planungswert (P50):</strong> ${fmt(p50)}<br>` +
+    `<strong>Bandbreite:</strong> ${fmt(p10)} – ${fmt(p90)}<br>` +
+    `<strong>Enthaltene Phasen:</strong> ${phases}`;
+  document.getElementById('send-modal').classList.add('open');
+  document.getElementById('field-name').focus();
+}
+
+document.getElementById('btn-send').addEventListener('click', openSendModal);
+document.getElementById('modal-close').addEventListener('click', () => document.getElementById('send-modal').classList.remove('open'));
+document.getElementById('modal-cancel').addEventListener('click', () => document.getElementById('send-modal').classList.remove('open'));
+document.getElementById('send-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+
+document.getElementById('modal-submit').addEventListener('click', () => {
+  const name = document.getElementById('field-name').value.trim();
+  const email = document.getElementById('field-email').value.trim();
+  const note = document.getElementById('field-note').value.trim();
+  if (!email) { document.getElementById('field-email').focus(); return; }
+
+  const state = loadState();
+  const active = Object.entries(STORIES).filter(([k, s]) => isActive(k, s, state)).map(([, s]) => s);
+  const sorted = active.length ? simulate(active) : [];
+  const p50 = sorted.length ? percentile(sorted, 50) : 0;
+  const p10 = sorted.length ? percentile(sorted, 10) : 0;
+  const p90 = sorted.length ? percentile(sorted, 90) : 0;
+  const phases = ['Phase 1', state.phase4 && 'Monetarisierung', state.phase2 && 'Phase 2', state.phase3 && 'Phase 3'].filter(Boolean).join(', ');
+
+  const subject = encodeURIComponent(`LOS V3 Angebot${name ? ' für ' + name : ''}`);
+  const body = encodeURIComponent(
+    `${name ? 'Guten Tag ' + name + ',\n\n' : ''}` +
+    `anbei die Zusammenfassung Ihres individuellen LOS V3 Angebots:\n\n` +
+    `Planungswert (P50): ${fmt(p50)}\n` +
+    `Bandbreite: ${fmt(p10)} – ${fmt(p90)}\n` +
+    `Enthaltene Phasen: ${phases}\n\n` +
+    `${note ? note + '\n\n' : ''}` +
+    `Mit freundlichen Grüßen\nRatwerk`
+  );
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  document.getElementById('send-modal').classList.remove('open');
+  showToast('E-Mail-Client geöffnet');
+});
 </script>
 </body>
 </html>
