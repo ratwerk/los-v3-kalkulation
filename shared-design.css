@@ -12,6 +12,7 @@
   --border: #e5e7eb;
   --border-dark: #d1d5db;
   --bg-subtle: #f3f4f6;
+  --rule: var(--border);
 }
 
 *, *::before, *::after { font-family: 'Poppins', sans-serif !important; box-sizing: border-box; }
@@ -51,7 +52,7 @@ body { background: var(--bg) !important; color: var(--text) !important; }
 .sc-steps { background: transparent !important; }
 .sc-pt { background: var(--bg-subtle) !important; border-top-color: var(--border) !important; }
 .cg-label { background: var(--bg-subtle) !important; border-bottom-color: var(--border) !important; color: var(--text-faint) !important; }
-.choice-opt { border-bottom-color: var(--border) !important; }
+.choice-opt { border-bottom-color: var(--border) !important; border-right-color: var(--border) !important; }
 .choice-opt:hover { background: var(--bg) !important; }
 
 /* TOGGLE */
