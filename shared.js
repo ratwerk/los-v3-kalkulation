@@ -60,7 +60,7 @@ const STORIES = {
     desc:'Mitarbeitende per Link oder QR-Code in einen bestimmten Bereich einladen — ohne vorab registriert zu sein.',
     steps:['Einladungslink mit Ablaufdatum generieren','QR-Code aus Link erzeugen','Link führt direkt zum Zielbereich','Gast-Zugang ohne Registrierung'] },
 
-  p1_priv:      { phase:1, min:4,  likely:8,  max:14, type:'required',
+  p1_priv:      { phase:1, min:4,  likely:8,  max:14, type:'toggle', stateKey:'p1_priv', defaultOn:true,
     id:'US-11', name:'Privacy & DSGVO',
     desc:'Niemand sieht die eigene Fremdbewertung — das ist eine Systemregel. Einwilligungen werden dokumentiert, Widersprüche protokolliert.',
     steps:['Systemregel: Sichtsperre eigener Fremdbewertungen','Widerspruchs-Flag für Mitarbeitende','Einwilligungs-Timestamps dokumentieren','BFF-Middleware prüft alle Datenzugriffe'] },
@@ -191,7 +191,7 @@ const DEFAULT_STATE = {
   phase2: true, phase3: true, phase4: true,
   meta: 'std', leit: 'std',
   p1_orgchart: false,
-  p1_hints: true, p1_vers: true, p1_qr: true,
+  p1_hints: true, p1_vers: true, p1_qr: true, p1_priv: true,
   p2_prep: true, p2_align: true, p2_final: true, p2_goals: true, p2_todos: true, p2_tmpl: true,
   p3_anon: true, p3_ki_meta: true, p3_staerken: true, p3_ki_hints: false, p3_smart: false,
   p3_chat: true, p3_migration: true, p3_audit: true, p3_crypt: true, p3_launch: true,

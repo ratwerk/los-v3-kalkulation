@@ -359,10 +359,13 @@
   </div>
 
   <!-- US-11 -->
-  <div class="story-card">
+  <div class="story-card" id="card-p1_priv">
     <div class="sc-head">
-      <div><div class="sc-meta"><span class="sc-id">US-11</span><span class="sc-badge badge-req">Pflicht</span></div><div class="sc-name">Privacy &amp; DSGVO</div></div>
-      <div class="sc-toggle"><div class="toggle on locked"></div><span class="toggle-label">Pflicht</span></div>
+      <div><div class="sc-meta"><span class="sc-id">US-11</span><span class="sc-badge badge-opt">Optional</span></div><div class="sc-name">Privacy &amp; DSGVO</div></div>
+      <div class="sc-toggle" onclick="toggle('p1_priv')">
+        <div class="toggle on" id="t-p1_priv"></div>
+        <span class="toggle-label" id="lbl-p1_priv">Enthalten</span>
+      </div>
     </div>
     <div class="sc-desc">Niemand sieht die eigene Fremdbewertung — systemseitig erzwungen. Einwilligungen werden dokumentiert, Widersprüche protokolliert.</div>
     <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
@@ -415,7 +418,7 @@ const state = loadState();
 
 function applyState() {
   // Toggles
-  ['p1_orgchart', 'p1_hints', 'p1_vers', 'p1_qr'].forEach(key => {
+  ['p1_orgchart', 'p1_hints', 'p1_vers', 'p1_qr', 'p1_priv'].forEach(key => {
     const on = !!state[key];
     const t = document.getElementById(`t-${key}`);
     const l = document.getElementById(`lbl-${key}`);
