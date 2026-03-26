@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 3 — LOS V3</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #F9F7F2; --paper-dark: #F0EDE5; --ink: #1A1A1A; --ink-soft: #4A4A4A;
+      --ink-faint: #8A8A8A; --rule: #D8D3C8; --phase: #7C3AED; --phase-bg: #F5F3FF;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(249,247,242,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .nav-back { font-size: 13px; color: var(--phase); text-decoration: none; font-weight: 600; }
+    .nav-back:hover { text-decoration: underline; }
+    .nav-title { font-size: 13px; color: var(--ink-soft); }
+    .nav-total { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--ink); }
+
+    .content { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .phase-header { padding: 44px 0 32px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+    .phase-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: var(--phase-bg); color: var(--phase); margin-bottom: 10px; }
+    .phase-header h1 { font-family: Georgia, serif; font-size: clamp(24px, 4vw, 34px); font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+    .phase-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
+
+    .phase-switch { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding: 14px 18px; background: white; border: 1px solid var(--rule); border-radius: 8px; }
+    .toggle { width: 40px; height: 22px; background: var(--rule); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle.on { background: var(--phase); }
+    .toggle.locked { cursor: default; }
+    .toggle::after { content:''; position:absolute; width:18px; height:18px; background:white; border-radius:50%; top:2px; left:2px; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on::after { transform: translateX(18px); }
+    .phase-switch-label { font-size: 14px; font-weight: 600; }
+    .phase-switch-note { font-size: 12px; color: var(--ink-soft); }
+
+    .stories { display: flex; flex-direction: column; gap: 10px; }
+    .stories.off { opacity: 0.4; pointer-events: none; }
+
+    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+    .story-card.inactive { opacity: 0.45; }
+    .story-card.locked-on { border-color: var(--phase); border-width: 1.5px; }
+
+    .sc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 18px 0; }
+    .sc-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .sc-id { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .sc-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; }
+    .badge-base { background: var(--phase-bg); color: var(--phase); }
+    .badge-ki { background: #FEF3C7; color: #B45309; }
+    .badge-opt { background: #F0FDF4; color: #16A34A; }
+    .sc-name { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .sc-desc { font-size: 13px; color: var(--ink-soft); padding: 0 18px 10px; line-height: 1.6; }
+    .sc-note { font-size: 12px; color: var(--phase); padding: 0 18px 8px; font-style: italic; }
+
+    .sc-toggle { flex-shrink: 0; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .toggle-label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+    .sc-steps { padding: 8px 18px 14px; }
+    .sc-steps-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 6px; }
+    .sc-steps ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .sc-steps li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
+    .sc-steps li::before { content: '·'; position: absolute; left: 3px; color: var(--phase); font-weight: 700; }
+
+    .sc-pt { display: flex; gap: 16px; padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--rule); }
+    .pt-item { display: flex; flex-direction: column; }
+    .pt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .pt-value { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .pt-item.featured .pt-value { color: var(--phase); }
+    .pt-item.featured .pt-label { color: var(--phase); }
+
+    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin: 24px 0 10px; }
+
+    .phase-total { background: white; border: 1px solid var(--rule); border-radius: 10px; padding: 24px; margin-top: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .pt-label-big { font-family: Georgia, serif; font-size: 16px; font-weight: 700; }
+    .pt-values { display: flex; gap: 24px; }
+    .ptv { text-align: center; }
+    .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
+    .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
+    .ptv.featured .ptv-value { color: var(--phase); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">← Übersicht</a>
+  <span class="nav-title">Phase 3 · KI-Erweiterung &amp; Go-Live</span>
+  <div class="nav-total" id="nav-total">—</div>
+</nav>
+
+<div class="content">
+  <div class="phase-header">
+    <div class="phase-badge">Phase 3</div>
+    <h1>KI-Erweiterung &amp; Go-Live</h1>
+    <p>KI-gestützte Analyse und Assistenz, Datenmigration aus der Vorgängerversion, Sicherheit und Launch. Die KI-Anonymisierung ist automatisch enthalten, sobald ein KI-Feature aktiv ist.</p>
+    <div class="phase-switch">
+      <div class="toggle" id="phase-toggle" onclick="togglePhase()"></div>
+      <div>
+        <div class="phase-switch-label" id="phase-label">Phase enthalten</div>
+        <div class="phase-switch-note">Setzt Phase 2 voraus</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stories" id="stories">
+
+    <div class="section-label">KI-Grundlage</div>
+
+    <!-- US-20 -->
+    <div class="story-card locked-on" id="card-p3_anon">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-20</span><span class="sc-badge badge-base">Basis KI</span></div><div class="sc-name">KI-Anonymisierung</div></div>
+        <div class="sc-toggle"><div class="toggle on locked" id="t-p3_anon"></div><span class="toggle-label" id="lbl-p3_anon">Pflicht bei KI</span></div>
+      </div>
+      <div class="sc-note">Automatisch enthalten, sobald ein KI-Feature aktiv ist</div>
+      <div class="sc-desc">Freitexte und Namen werden vor der KI-Verarbeitung anonymisiert — Klarnamen verlassen das System nie. DSGVO-konform.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Personenbezogene Felder vor KI-Aufruf anonymisieren (NER)</li>
+        <li>IDs statt Klarnamen in KI-Prompts</li>
+        <li>Serverseitige Rückübersetzung der KI-Antwort</li>
+        <li>DSGVO: keine Klarnamen an externe KI-API</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">2 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">KI-Features</div>
+
+    <!-- US-08 -->
+    <div class="story-card" id="card-p3_ki_meta">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-08</span><span class="sc-badge badge-ki">KI</span></div><div class="sc-name">KI-Vorschläge: Metaprogramme &amp; Stärken</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_ki_meta')"><div class="toggle on" id="t-p3_ki_meta"></div><span class="toggle-label" id="lbl-p3_ki_meta">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Die KI analysiert das Merkmalsprofil und schlägt passende Teamrollen und Stärken vor — mit Begründung. Vorschläge können übernommen oder verworfen werden.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Merkmalsprofil und Führungsleitfaden als KI-Kontext aufbereiten</li>
+        <li>KI-Analyse: passende Teamrollen und Stärken ermitteln</li>
+        <li>Vorschläge mit Begründung anzeigen</li>
+        <li>Übernahme ins Profil mit einem Klick</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">3,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-09 -->
+    <div class="story-card" id="card-p3_staerken">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-09</span><span class="sc-badge badge-ki">KI</span></div><div class="sc-name">KI-Stärkentest</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_staerken')"><div class="toggle on" id="t-p3_staerken"></div><span class="toggle-label" id="lbl-p3_staerken">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Ein KI-Dialog führt durch einen strukturierten Stärkentest. Für Gäste ohne Account: Auswertung per E-Mail.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>KI-Dialog: strukturierter Fragebogen zur Stärken-Ermittlung</li>
+        <li>Chat-UI aufbauen (wiederverwendbar für KI-Assistenz)</li>
+        <li>Ergebnis für eingeloggte User ins Profil</li>
+        <li>Nicht eingeloggte User erhalten Auswertung per E-Mail</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">2,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">4,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-19 -->
+    <div class="story-card" id="card-p3_chat">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-19</span><span class="sc-badge badge-ki">KI</span></div><div class="sc-name">KI-Assistenz Chat</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_chat')"><div class="toggle on" id="t-p3_chat"></div><span class="toggle-label" id="lbl-p3_chat">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Kontextsensitiver KI-Chat pro Person. Die KI kennt Merkmale, letzte Gespräche, Ziele und offene ToDos — und hilft bei Gesprächsvorbereitung und Formulierungen.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Chat-Oberfläche pro Person aufbauen</li>
+        <li>Automatischer Kontext: Merkmale, Gespräche, Ziele, ToDos</li>
+        <li>Funktionen: Gesprächsvorbereitung, Formulierungshilfe, Plausibilisierung</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">2 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">3,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-06b optional -->
+    <div class="story-card" id="card-p3_ki_hints">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-06b</span><span class="sc-badge badge-opt">Optional</span></div><div class="sc-name">KI-Vorschläge Führungshinweise</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_ki_hints')"><div class="toggle" id="t-p3_ki_hints"></div><span class="toggle-label" id="lbl-p3_ki_hints">Nicht enthalten</span></div>
+      </div>
+      <div class="sc-desc">Die KI schlägt automatisch Führungshinweise basierend auf dem Merkmalsprofil vor. Ergänzung zu den manuellen Notizen.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>KI analysiert Merkmalsprofil und generiert Führungshinweise</li>
+        <li>Vorschläge zur Übernahme anzeigen</li>
+        <li>Anonymisierung via US-20</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-16b optional -->
+    <div class="story-card" id="card-p3_smart">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-16b</span><span class="sc-badge badge-opt">Optional</span></div><div class="sc-name">SMART-Check per KI-Dialog</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_smart')"><div class="toggle" id="t-p3_smart"></div><span class="toggle-label" id="lbl-p3_smart">Nicht enthalten</span></div>
+      </div>
+      <div class="sc-desc">Geführter KI-Dialog zur Überprüfung und Schärfung von Zielen nach dem SMART-Prinzip.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>KI-Dialog: Ziel schrittweise auf SMART-Kriterien prüfen</li>
+        <li>Iterative Verbesserung der Zielformulierung</li>
+        <li>Ergebnis im Ziel speichern</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2 PT</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Migration, Sicherheit &amp; Launch</div>
+
+    <!-- US-21 -->
+    <div class="story-card" id="card-p3_migration">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-21</span></div><div class="sc-name">Datenmigration V2 → V3</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_migration')"><div class="toggle on" id="t-p3_migration"></div><span class="toggle-label" id="lbl-p3_migration">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Alle bestehenden Daten werden aus der V2-Datenbank in die neue V3-Struktur überführt. Mit Validierung und Rollback-Möglichkeit.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>V2-Datenbankstruktur analysieren und Mapping definieren</li>
+        <li>ETL-Script für alle Tabellen schreiben</li>
+        <li>Mandanten-Zuordnung klären und umsetzen</li>
+        <li>Validierung, Testlauf und Rollback-Strategie</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">2 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">3 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">4,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-22 -->
+    <div class="story-card" id="card-p3_audit">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-22</span></div><div class="sc-name">Audit-Log &amp; Monitoring</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_audit')"><div class="toggle on" id="t-p3_audit"></div><span class="toggle-label" id="lbl-p3_audit">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Lückenlose Protokollierung aller relevanten Aktionen. Admin-Ansicht für Compliance-Prüfungen und Basis-Monitoring.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Append-only Log für alle relevanten Aktionen</li>
+        <li>Admin-Ansicht für Audit-Log</li>
+        <li>Basis-Monitoring: Fehlerraten und Performance</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-23 -->
+    <div class="story-card" id="card-p3_crypt">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-23</span></div><div class="sc-name">Feldverschlüsselung (DSGVO)</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_crypt')"><div class="toggle on" id="t-p3_crypt"></div><span class="toggle-label" id="lbl-p3_crypt">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Personenbezogene Daten werden verschlüsselt gespeichert. Schlüsselverwaltung nach DSGVO-Anforderungen.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Personenbezogene Felder identifizieren</li>
+        <li>Verschlüsselung at rest implementieren</li>
+        <li>Key Management nach DSGVO</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-24 -->
+    <div class="story-card" id="card-p3_launch">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-24</span></div><div class="sc-name">Abnahme, Launch &amp; Einweisung</div></div>
+        <div class="sc-toggle" onclick="toggle('p3_launch')"><div class="toggle on" id="t-p3_launch"></div><span class="toggle-label" id="lbl-p3_launch">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Produktions-Deployment, Abnahme-Tests mit dem Auftraggeber, Einweisung aller Rollen und Kurzanleitungen.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Produktions-Deployment und finale Tests</li>
+        <li>Abnahme mit Auftraggeber</li>
+        <li>Einweisung für alle Rollen (Admin, FK, MA)</li>
+        <li>Kurzanleitungen erstellen</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">2 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="phase-total">
+    <div class="pt-label-big">Phase 3 gesamt</div>
+    <div class="pt-values">
+      <div class="ptv"><div class="ptv-label">Optimistisch</div><div class="ptv-value" id="tot-min">—</div></div>
+      <div class="ptv featured"><div class="ptv-label">Wahrscheinlich</div><div class="ptv-value" id="tot-likely">—</div></div>
+      <div class="ptv"><div class="ptv-label">Konservativ</div><div class="ptv-value" id="tot-max">—</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const state = loadState();
+const KEYS = ['p3_anon','p3_ki_meta','p3_staerken','p3_ki_hints','p3_smart','p3_chat','p3_migration','p3_audit','p3_crypt','p3_launch'];
+
+function kiActive() {
+  return ['p3_ki_meta','p3_staerken','p3_ki_hints','p3_smart','p3_chat'].some(k => state[k]);
+}
+
+function applyState() {
+  const phaseOn = !!state.phase3;
+  document.getElementById('phase-toggle').classList.toggle('on', phaseOn);
+  document.getElementById('phase-label').textContent = phaseOn ? 'Phase enthalten' : 'Phase nicht enthalten';
+  document.getElementById('stories').classList.toggle('off', !phaseOn);
+
+  // US-20 locked if any ki active
+  const ki = kiActive();
+  const anon = ki || state.p3_anon;
+  state.p3_anon = anon;
+  const ta = document.getElementById('t-p3_anon');
+  const la = document.getElementById('lbl-p3_anon');
+  if (ta) ta.classList.toggle('on', anon);
+  if (la) la.textContent = ki ? 'Pflicht (KI aktiv)' : (anon ? 'Enthalten' : 'Nicht enthalten');
+  const cardAnon = document.getElementById('card-p3_anon');
+  if (cardAnon) cardAnon.classList.toggle('locked-on', ki);
+
+  KEYS.filter(k => k !== 'p3_anon').forEach(key => {
+    const on = !!state[key];
+    const t = document.getElementById(`t-${key}`);
+    const l = document.getElementById(`lbl-${key}`);
+    if (t) t.classList.toggle('on', on);
+    if (l) l.textContent = on ? 'Enthalten' : 'Nicht enthalten';
+    const card = document.getElementById(`card-${key}`);
+    if (card) card.classList.toggle('inactive', !on);
+  });
+
+  updateTotal();
+}
+
+function togglePhase() {
+  state.phase3 = !state.phase3;
+  if (state.phase3 && !state.phase2) state.phase2 = true;
+  saveState(state);
+  applyState();
+}
+
+function toggle(key) {
+  state[key] = !state[key];
+  saveState(state);
+  applyState();
+}
+
+function updateTotal() {
+  const active = Object.entries(STORIES).filter(([k, s]) => s.phase === 3 && isActive(k, s, state));
+  const min = active.reduce((s, [, x]) => s + x.min, 0) * RATE;
+  const likely = active.reduce((s, [, x]) => s + x.likely, 0) * RATE;
+  const max = active.reduce((s, [, x]) => s + x.max, 0) * RATE;
+  document.getElementById('tot-min').textContent = fmt(min);
+  document.getElementById('tot-likely').textContent = fmt(likely);
+  document.getElementById('tot-max').textContent = fmt(max);
+  document.getElementById('nav-total').textContent = fmt(likely);
+}
+
+applyState();
+</script>
+</body>
+</html>

@@ -7,1057 +7,242 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --paper: #F9F7F2;
-      --paper-dark: #F0EDE5;
-      --ink: #1A1A1A;
-      --ink-soft: #4A4A4A;
-      --ink-faint: #8A8A8A;
-      --rule: #D8D3C8;
-      --blue: #2D5BE3;
-      --blue-bg: #EEF2FC;
-      --green: #16A34A;
-      --green-bg: #F0FDF4;
-      --purple: #7C3AED;
-      --purple-bg: #F5F3FF;
-      --amber: #D97706;
+      --paper: #F9F7F2; --paper-dark: #F0EDE5; --ink: #1A1A1A; --ink-soft: #4A4A4A;
+      --ink-faint: #8A8A8A; --rule: #D8D3C8;
+      --blue: #2D5BE3; --blue-bg: #EEF2FC;
+      --green: #16A34A; --green-bg: #F0FDF4;
+      --purple: #7C3AED; --purple-bg: #F5F3FF;
     }
-
     html { scroll-behavior: smooth; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--paper);
-      color: var(--ink);
-      line-height: 1.6;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
 
-    /* ── STICKY NAV ── */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(249,247,242,0.96);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--rule);
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      gap: 0;
-    }
-    .nav-brand {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--blue);
-      letter-spacing: 0.04em;
-      padding: 14px 20px 14px 0;
-      border-right: 1px solid var(--rule);
-      margin-right: 12px;
-      white-space: nowrap;
-    }
-    .nav-links {
-      display: flex;
-      gap: 0;
-      flex: 1;
-      overflow-x: auto;
-    }
-    .nav-links a {
-      font-size: 13px;
-      color: var(--ink-soft);
-      text-decoration: none;
-      padding: 14px 14px;
-      white-space: nowrap;
-      border-bottom: 2px solid transparent;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .nav-links a:hover { color: var(--ink); border-bottom-color: var(--rule); }
-    .nav-total {
-      margin-left: auto;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--blue);
-      white-space: nowrap;
-      padding-left: 20px;
-    }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(249,247,242,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .nav-brand { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 0.04em; }
+    .nav-total { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--ink); }
 
-    /* ── HERO ── */
-    .hero {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 60px 24px 40px;
-      border-bottom: 1px solid var(--rule);
-    }
-    .hero-kicker {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--blue);
-      margin-bottom: 12px;
-    }
-    .hero h1 {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: clamp(28px, 5vw, 42px);
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-    .hero-sub {
-      font-size: 16px;
-      color: var(--ink-soft);
-      max-width: 560px;
-      margin-bottom: 40px;
-    }
-    .hero-metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--rule);
-      border: 1px solid var(--rule);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .metric {
-      background: white;
-      padding: 20px 24px;
-    }
+    .content { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .page-header { padding: 52px 0 36px; }
+    .kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+    .page-header h1 { font-family: Georgia, serif; font-size: clamp(26px, 4vw, 38px); font-weight: 700; line-height: 1.2; margin-bottom: 10px; }
+    .page-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
+
+    /* PHASE BOXES */
+    .phases { display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; }
+
+    .phase-box { display: block; background: white; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.1s; }
+    .phase-box:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .phase-box.off { opacity: 0.5; }
+
+    .pbh { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 20px 24px 16px; border-bottom: 1px solid var(--rule); }
+    .pbh-left {}
+    .phase-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 6px; }
+    .pb-1 { background: var(--blue-bg); color: var(--blue); }
+    .pb-2 { background: var(--green-bg); color: var(--green); }
+    .pb-3 { background: var(--purple-bg); color: var(--purple); }
+    .phase-name { font-family: Georgia, serif; font-size: 19px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .phase-tagline { font-size: 13px; color: var(--ink-soft); }
+
+    .pbh-right { text-align: right; flex-shrink: 0; }
+    .price-label { font-size: 11px; color: var(--ink-faint); margin-bottom: 4px; }
+    .price-value { font-family: Georgia, serif; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
+    .price-sub { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+
+    .pbb { padding: 14px 24px 16px; }
+    .sprint-list { display: flex; flex-direction: column; gap: 5px; }
+    .sprint-row { display: flex; align-items: center; gap: 10px; }
+    .s-id { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-faint); width: 42px; flex-shrink: 0; }
+    .s-name { font-size: 12px; color: var(--ink-soft); width: 210px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .s-bar-wrap { flex: 1; height: 5px; background: var(--paper-dark); border-radius: 3px; overflow: hidden; }
+    .s-bar { height: 100%; border-radius: 3px; }
+    .s-pt { font-size: 11px; color: var(--ink-faint); width: 48px; text-align: right; flex-shrink: 0; }
+
+    .pbf { padding: 10px 24px; background: var(--paper); border-top: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--ink-soft); }
+    .pbf-arrow { font-size: 13px; color: var(--blue); font-weight: 600; }
+
+    /* TOTAL */
+    .total-section { background: white; border: 1px solid var(--rule); border-radius: 12px; padding: 28px; margin-bottom: 16px; }
+    .total-title { font-family: Georgia, serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+    .metric { background: white; padding: 16px 20px; }
     .metric.featured { background: var(--blue); }
-    .metric-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: var(--ink-faint);
-      margin-bottom: 8px;
-    }
-    .metric.featured .metric-label { color: rgba(255,255,255,0.65); }
-    .metric-value {
-      font-family: Georgia, serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .metric.featured .metric-value { color: white; }
-    .metric-note {
-      font-size: 11px;
-      color: var(--ink-faint);
-    }
-    .metric.featured .metric-note { color: rgba(255,255,255,0.55); }
+    .m-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 6px; }
+    .metric.featured .m-label { color: rgba(255,255,255,0.65); }
+    .m-value { font-family: Georgia, serif; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1; }
+    .metric.featured .m-value { color: white; }
+    .m-note { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+    .metric.featured .m-note { color: rgba(255,255,255,0.5); }
 
-    /* ── CONTENT ── */
-    .content { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+    .chart-box { background: white; border: 1px solid var(--rule); border-radius: 12px; padding: 24px; }
+    .chart-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .chart-box p { font-size: 12px; color: var(--ink-faint); margin-bottom: 14px; }
+    .chart-wrap { height: 190px; position: relative; }
 
-    /* ── PHASE SECTION ── */
-    .phase-section {
-      padding: 48px 0 24px;
-      border-bottom: 1px solid var(--rule);
-    }
-    .phase-section:last-of-type { border-bottom: none; }
-
-    .phase-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .phase-head-left {}
-    .phase-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 20px;
-      margin-bottom: 8px;
-    }
-    .badge-1 { background: var(--blue-bg); color: var(--blue); }
-    .badge-2 { background: var(--green-bg); color: var(--green); }
-    .badge-3 { background: var(--purple-bg); color: var(--purple); }
-    .badge-opt { background: #FEF3C7; color: #B45309; }
-
-    .phase-title {
-      font-family: Georgia, serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 4px;
-    }
-    .phase-desc { font-size: 14px; color: var(--ink-soft); }
-
-    .phase-toggle-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    .phase-toggle-wrap label { font-size: 13px; color: var(--ink-soft); }
-    .toggle {
-      width: 40px;
-      height: 22px;
-      background: var(--rule);
-      border-radius: 11px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-    .toggle.on { background: var(--blue); }
-    .toggle.green.on { background: var(--green); }
-    .toggle.purple.on { background: var(--purple); }
-    .toggle.locked { cursor: not-allowed; opacity: 0.7; }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      background: white;
-      border-radius: 50%;
-      top: 2px;
-      left: 2px;
-      transition: transform 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .toggle.on::after { transform: translateX(18px); }
-
-    /* ── STORY CARDS ── */
-    .stories { display: flex; flex-direction: column; gap: 1px; }
-
-    .story-card {
-      background: white;
-      border: 1px solid var(--rule);
-      border-radius: 8px;
-      padding: 16px 18px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: start;
-    }
-    .story-card.disabled { opacity: 0.4; pointer-events: none; }
-
-    .story-id {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      margin-bottom: 2px;
-    }
-    .story-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 10px;
-    }
-    .story-badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 2px 7px;
-      border-radius: 3px;
-      margin-left: 6px;
-      vertical-align: middle;
-    }
-    .sb-premium { background: #F5F3FF; color: var(--purple); }
-    .sb-ki { background: #FEF3C7; color: var(--amber); }
-
-    .olp-bars { display: flex; flex-direction: column; gap: 5px; }
-    .olp-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-    }
-    .olp-label {
-      width: 14px;
-      font-weight: 700;
-      color: var(--ink-faint);
-      flex-shrink: 0;
-    }
-    .bar-track {
-      flex: 1;
-      height: 6px;
-      background: var(--paper-dark);
-      border-radius: 3px;
-      overflow: hidden;
-      min-width: 80px;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 3px;
-    }
-    .bf-1 { background: var(--blue); opacity: 0.5; }
-    .bf-2 { background: var(--green); opacity: 0.5; }
-    .bf-3 { background: var(--purple); opacity: 0.5; }
-    .olp-row.featured .bar-fill { opacity: 1; }
-
-    .olp-cost {
-      width: 75px;
-      text-align: right;
-      color: var(--ink-soft);
-      font-size: 12px;
-      flex-shrink: 0;
-    }
-    .olp-row.featured .olp-cost { font-weight: 700; color: var(--ink); }
-
-    /* ── CHOICE GROUPS ── */
-    .choice-group {
-      margin-top: 12px;
-      border: 1px solid var(--rule);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .choice-group-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--ink-faint);
-      background: var(--paper-dark);
-      padding: 8px 14px;
-    }
-    .choice-option {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 14px;
-      cursor: pointer;
-      border-top: 1px solid var(--rule);
-      background: white;
-      transition: background 0.1s;
-    }
-    .choice-option:first-of-type { border-top: none; }
-    .choice-option:hover { background: var(--paper); }
-    .choice-option.selected { background: var(--blue-bg); }
-    .choice-option input[type=radio] { accent-color: var(--blue); flex-shrink: 0; margin-top: 2px; }
-    .choice-name { font-size: 13px; font-weight: 600; color: var(--ink); }
-    .choice-desc { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
-    .choice-desc a { color: var(--blue); text-decoration: none; font-weight: 600; }
-    .choice-desc a:hover { text-decoration: underline; }
-
-    /* ── OPTIONAL ROW ── */
-    .optional-row {
-      margin-top: 8px;
-      border: 1px solid var(--rule);
-      border-radius: 8px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      background: white;
-      cursor: pointer;
-    }
-    .optional-row:hover { background: var(--paper); }
-    .optional-row.checked { background: var(--blue-bg); border-color: #93b4f7; }
-    .optional-row input[type=checkbox] { accent-color: var(--blue); flex-shrink: 0; margin-top: 2px; cursor: pointer; }
-    .opt-name { font-size: 13px; font-weight: 600; color: var(--ink); }
-    .opt-desc { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
-
-    /* ── SIMULATION ── */
-    .sim-section { padding: 48px 0 32px; }
-    .sim-title {
-      font-family: Georgia, serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 6px;
-    }
-    .sim-desc { font-size: 14px; color: var(--ink-soft); margin-bottom: 32px; }
-
-    .chart-box {
-      background: white;
-      border: 1px solid var(--rule);
-      border-radius: 10px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .chart-box h3 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 4px;
-    }
-    .chart-box p { font-size: 12px; color: var(--ink-faint); margin-bottom: 16px; }
-    .chart-wrap { position: relative; height: 220px; }
-
-    .breakdown-box {
-      background: white;
-      border: 1px solid var(--rule);
-      border-radius: 10px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .breakdown-box h3 { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 20px; }
-    .bd-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-    .bd-row:last-child { margin-bottom: 0; }
-    .bd-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .bd-label { font-size: 13px; color: var(--ink-soft); width: 200px; flex-shrink: 0; }
-    .bd-track { flex: 1; height: 8px; background: var(--paper-dark); border-radius: 4px; overflow: hidden; }
-    .bd-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
-    .bd-val { font-size: 13px; font-weight: 700; color: var(--ink); width: 90px; text-align: right; flex-shrink: 0; }
-
-    /* ── METHODIK ── */
-    .methodik {
-      background: white;
-      border: 1px solid var(--rule);
-      border-radius: 10px;
-      padding: 28px;
-    }
-    .methodik h3 { font-family: Georgia, serif; font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
-    .methodik p { font-size: 13px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 12px; }
-    .methodik p:last-child { margin-bottom: 0; }
-
-    /* ── MOBILE ── */
-    @media (max-width: 700px) {
-      .hero-metrics { grid-template-columns: 1fr 1fr; }
-      .hero-metrics .metric:last-child { grid-column: span 2; }
-      .story-card { grid-template-columns: 1fr; }
-      .nav-links a { padding: 14px 10px; font-size: 12px; }
-      .nav-total { font-size: 12px; }
-    }
-    @media (max-width: 480px) {
-      .hero-metrics { grid-template-columns: 1fr; }
-      .hero-metrics .metric:last-child { grid-column: span 1; }
-      .metric.featured { order: -1; }
+    @media (max-width: 620px) {
+      .s-name { width: 130px; }
+      .metrics { grid-template-columns: 1fr; }
+      .pbh { flex-direction: column; gap: 8px; }
+      .pbh-right { text-align: left; }
     }
   </style>
 </head>
 <body>
 
-<!-- STICKY NAV -->
 <nav class="nav">
-  <div class="nav-brand">LOS V3</div>
-  <div class="nav-links">
-    <a href="#phase1">Phase 1</a>
-    <a href="#phase2">Phase 2</a>
-    <a href="#phase3">Phase 3</a>
-    <a href="#simulation">Simulation</a>
-    <a href="#methodik">Methodik</a>
-  </div>
-  <div class="nav-total" id="nav-total">—</div>
+  <div class="nav-brand">LOS V3 — Projektkalkulation</div>
+  <div class="nav-total" id="nav-total">wird berechnet …</div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-kicker">Projektkalkulation · Monte-Carlo-Analyse</div>
-  <h1>Leadership Operating System V3</h1>
-  <p class="hero-sub">
-    Konfigurieren Sie Ihr Paket — die Kostenverteilung aktualisiert sich in Echtzeit.
-    Alle Werte basieren auf 50.000 Simulationen mit Dreiecksverteilung.
-  </p>
-  <div class="hero-metrics">
-    <div class="metric">
-      <div class="metric-label">Optimistisch (P10)</div>
-      <div class="metric-value" id="hero-p10">—</div>
-      <div class="metric-note">Günstigster realistischer Verlauf</div>
-    </div>
-    <div class="metric featured">
-      <div class="metric-label">Wahrscheinlichster Wert (P50)</div>
-      <div class="metric-value" id="hero-p50">—</div>
-      <div class="metric-note">Planungswert</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Konservativ (P90)</div>
-      <div class="metric-value" id="hero-p90">—</div>
-      <div class="metric-note">Puffer für Unbekanntes</div>
+<div class="content">
+  <div class="page-header">
+    <div class="kicker">Leadership Operating System V3</div>
+    <h1>Ihr individuelles Angebot</h1>
+    <p>Klicken Sie auf eine Phase, um die enthaltenen Bausteine zu sehen und zu konfigurieren. Die Gesamtkosten aktualisieren sich automatisch.</p>
+  </div>
+
+  <div class="phases">
+
+    <a href="phase1.html" class="phase-box" id="box-p1">
+      <div class="pbh">
+        <div class="pbh-left">
+          <div class="phase-badge pb-1">Phase 1 · Immer enthalten</div>
+          <div class="phase-name">Das digitale Führungsprofil</div>
+          <div class="phase-tagline">Architektur, Rollen, Merkmalsprofil, Privacy</div>
+        </div>
+        <div class="pbh-right">
+          <div class="price-label">Planungswert</div>
+          <div class="price-value" id="price-p1">—</div>
+          <div class="price-sub">wahrscheinlich</div>
+        </div>
+      </div>
+      <div class="pbb"><div class="sprint-list" id="list-p1"></div></div>
+      <div class="pbf"><span id="count-p1"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
+    </a>
+
+    <a href="phase2.html" class="phase-box" id="box-p2">
+      <div class="pbh">
+        <div class="pbh-left">
+          <div class="phase-badge pb-2" id="badge-p2">Phase 2</div>
+          <div class="phase-name">Zusammenarbeit &amp; Verbindlichkeit</div>
+          <div class="phase-tagline">Gespräche, Ziele, ToDos &amp; Vorlagen</div>
+        </div>
+        <div class="pbh-right">
+          <div class="price-label">Planungswert</div>
+          <div class="price-value" id="price-p2">—</div>
+          <div class="price-sub">wahrscheinlich</div>
+        </div>
+      </div>
+      <div class="pbb"><div class="sprint-list" id="list-p2"></div></div>
+      <div class="pbf"><span id="count-p2"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
+    </a>
+
+    <a href="phase3.html" class="phase-box" id="box-p3">
+      <div class="pbh">
+        <div class="pbh-left">
+          <div class="phase-badge pb-3" id="badge-p3">Phase 3</div>
+          <div class="phase-name">KI-Erweiterung &amp; Go-Live</div>
+          <div class="phase-tagline">KI-Features, Datenmigration, Sicherheit &amp; Launch</div>
+        </div>
+        <div class="pbh-right">
+          <div class="price-label">Planungswert</div>
+          <div class="price-value" id="price-p3">—</div>
+          <div class="price-sub">wahrscheinlich</div>
+        </div>
+      </div>
+      <div class="pbb"><div class="sprint-list" id="list-p3"></div></div>
+      <div class="pbf"><span id="count-p3"></span><span class="pbf-arrow">Details &amp; Konfiguration →</span></div>
+    </a>
+
+  </div>
+
+  <div class="total-section">
+    <div class="total-title">Gesamtkosten — Monte-Carlo-Analyse</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="m-label">Optimistisch (P10)</div>
+        <div class="m-value" id="total-p10">—</div>
+        <div class="m-note">Günstiger realistischer Verlauf</div>
+      </div>
+      <div class="metric featured">
+        <div class="m-label">Planungswert (P50)</div>
+        <div class="m-value" id="total-p50">—</div>
+        <div class="m-note">Median aus 50.000 Simulationen</div>
+      </div>
+      <div class="metric">
+        <div class="m-label">Konservativ (P90)</div>
+        <div class="m-value" id="total-p90">—</div>
+        <div class="m-note">Puffer für unbekannte Risiken</div>
+      </div>
     </div>
   </div>
-</section>
 
-<!-- CONTENT -->
-<div class="content">
+  <div class="chart-box">
+    <h3>Wahrscheinlichkeitsverteilung der Gesamtkosten</h3>
+    <p>50.000 Monte-Carlo-Simulationen · Dreiecksverteilung pro Baustein</p>
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+  </div>
+</div>
 
-  <!-- ── PHASE 1 ── -->
-  <section class="phase-section" id="phase1">
-    <div class="phase-head">
-      <div class="phase-head-left">
-        <div class="phase-badge badge-1">Phase 1</div>
-        <div class="phase-title">Fundament &amp; Merkmalsprofil</div>
-        <div class="phase-desc">Architektur, Login, Organisationsstruktur, Profile — immer enthalten</div>
-      </div>
-      <div class="phase-toggle-wrap">
-        <label>Immer enthalten</label>
-        <div class="toggle on locked" id="toggle-p1"></div>
-      </div>
-    </div>
-
-    <div class="stories">
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-01</div>
-          <div class="story-name">Mandanten-Architektur &amp; BFF</div>
-        </div>
-        <div class="olp-bars" data-key="p1_arch"></div>
-      </div>
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-02</div>
-          <div class="story-name">Login &amp; Rollensystem (4 Rollen)</div>
-        </div>
-        <div class="olp-bars" data-key="p1_auth"></div>
-      </div>
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-03</div>
-          <div class="story-name">People &amp; Organisation (Hierarchie, Profile)</div>
-        </div>
-        <div class="olp-bars" data-key="p1_org"></div>
-      </div>
-
-      <!-- Organigramm optional -->
-      <div class="optional-row" id="opt-row-orgchart" onclick="toggleOptional('cb-orgchart')">
-        <input type="checkbox" id="cb-orgchart" onclick="event.stopPropagation(); toggleOptional('cb-orgchart')">
-        <div>
-          <div class="opt-name">Organigramm-Ansicht <span class="story-badge sb-premium">Premium</span></div>
-          <div class="opt-desc">Visuelle Darstellung der Linienhierarchie (US-03b) — setzt US-03 voraus</div>
-        </div>
-        <div class="olp-bars" data-key="p1_orgchart" style="margin-left:auto"></div>
-      </div>
-
-      <!-- Sprachmuster choice -->
-      <div class="choice-group">
-        <div class="choice-group-label">Sprachmuster — 12 Metaprogramme (US-04)</div>
-        <div class="choice-option selected" id="opt-meta-std" onclick="selectChoice('meta','std')">
-          <input type="radio" name="meta" value="std" checked>
-          <div>
-            <div class="choice-name">Standard — Übersicht &amp; Bearbeitungsmodus</div>
-            <div class="choice-desc">View/Edit-Modus, bewährtes Design</div>
-          </div>
-          <div class="olp-bars" data-key="p1_meta_std" style="margin-left:auto"></div>
-        </div>
-        <div class="choice-option" id="opt-meta-prem" onclick="selectChoice('meta','prem')">
-          <input type="radio" name="meta" value="prem">
-          <div>
-            <div class="choice-name">Premium — Split-Layout <span class="story-badge sb-premium">Premium</span></div>
-            <div class="choice-desc">Übersicht links, Bearbeitung rechts · <a href="mockup_splitmode.html" target="_blank" onclick="event.stopPropagation()">Vorschau ansehen →</a></div>
-          </div>
-          <div class="olp-bars" data-key="p1_meta_prem" style="margin-left:auto"></div>
-        </div>
-      </div>
-
-      <!-- Führungsleitfaden choice -->
-      <div class="choice-group">
-        <div class="choice-group-label">Führungsleitfaden — Stärken, Werte, Rollen (US-05)</div>
-        <div class="choice-option selected" id="opt-leit-std" onclick="selectChoice('leit','std')">
-          <input type="radio" name="leit" value="std" checked>
-          <div>
-            <div class="choice-name">Standard — Formularansicht</div>
-            <div class="choice-desc">Strukturiertes Formular mit allen Feldern</div>
-          </div>
-          <div class="olp-bars" data-key="p1_leit_std" style="margin-left:auto"></div>
-        </div>
-        <div class="choice-option" id="opt-leit-prem" onclick="selectChoice('leit','prem')">
-          <input type="radio" name="leit" value="prem">
-          <div>
-            <div class="choice-name">Premium — Split-Layout <span class="story-badge sb-premium">Premium</span></div>
-            <div class="choice-desc">Gleiche Logik wie Sprachmuster, setzt Split-Layout voraus</div>
-          </div>
-          <div class="olp-bars" data-key="p1_leit_prem" style="margin-left:auto"></div>
-        </div>
-      </div>
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-06</div>
-          <div class="story-name">Führungshinweise &amp; Stolpersteine</div>
-        </div>
-        <div class="olp-bars" data-key="p1_hints"></div>
-      </div>
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-07</div>
-          <div class="story-name">Versionierung &amp; Restore</div>
-        </div>
-        <div class="olp-bars" data-key="p1_vers"></div>
-      </div>
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-10</div>
-          <div class="story-name">QR-Code / Einladungslink</div>
-        </div>
-        <div class="olp-bars" data-key="p1_qr"></div>
-      </div>
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-11</div>
-          <div class="story-name">Datenschutz &amp; Privacy (DSGVO)</div>
-        </div>
-        <div class="olp-bars" data-key="p1_priv"></div>
-      </div>
-
-      <div class="story-card">
-        <div>
-          <div class="story-id">US-12</div>
-          <div class="story-name">Responsive Design-System</div>
-        </div>
-        <div class="olp-bars" data-key="p1_ui"></div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ── PHASE 2 ── -->
-  <section class="phase-section" id="phase2">
-    <div class="phase-head">
-      <div class="phase-head-left">
-        <div class="phase-badge badge-2">Phase 2</div>
-        <div class="phase-title">Gespräche, Ziele &amp; ToDos</div>
-        <div class="phase-desc">Gesprächs-Workflow, Verbindlichkeit und Aufgabenmanagement</div>
-      </div>
-      <div class="phase-toggle-wrap">
-        <label id="lbl-p2">Enthalten</label>
-        <div class="toggle green on" id="toggle-p2" onclick="togglePhase(2)"></div>
-      </div>
-    </div>
-
-    <div class="stories" id="stories-p2">
-      <div class="story-card">
-        <div><div class="story-id">US-13</div><div class="story-name">Gesprächsvorbereitung (asynchron, FK + MA)</div></div>
-        <div class="olp-bars" data-key="p2_prep"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-14</div><div class="story-name">Gesprächsabgleich &amp; Terminplanung</div></div>
-        <div class="olp-bars" data-key="p2_align"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-15</div><div class="story-name">Finale Version &amp; Druck</div></div>
-        <div class="olp-bars" data-key="p2_final"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-16</div><div class="story-name">Zielmanagement</div></div>
-        <div class="olp-bars" data-key="p2_goals"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-17</div><div class="story-name">ToDo-Engine</div></div>
-        <div class="olp-bars" data-key="p2_todos"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-18</div><div class="story-name">Template-System (Markdown)</div></div>
-        <div class="olp-bars" data-key="p2_tmpl"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── PHASE 3 ── -->
-  <section class="phase-section" id="phase3">
-    <div class="phase-head">
-      <div class="phase-head-left">
-        <div class="phase-badge badge-3">Phase 3</div>
-        <div class="phase-title">KI-Features, Migration &amp; Launch</div>
-        <div class="phase-desc">KI-Anonymisierung, KI-Assistenz, Datenmigration V2→V3, Abnahme</div>
-      </div>
-      <div class="phase-toggle-wrap">
-        <label id="lbl-p3">Enthalten</label>
-        <div class="toggle purple on" id="toggle-p3" onclick="togglePhase(3)"></div>
-      </div>
-    </div>
-
-    <div class="stories" id="stories-p3">
-      <div class="story-card">
-        <div><div class="story-id">US-20</div><div class="story-name">KI-Anonymisierung (Voraussetzung für alle KI-Features)</div></div>
-        <div class="olp-bars" data-key="p3_anon"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-08</div><div class="story-name">KI-Vorschläge: Metaprogramme ↔ Teamrollen/Stärken <span class="story-badge sb-ki">KI</span></div></div>
-        <div class="olp-bars" data-key="p3_ki_meta"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-09</div><div class="story-name">Stärkentest (KI-geführter Dialog) <span class="story-badge sb-ki">KI</span></div></div>
-        <div class="olp-bars" data-key="p3_staerken"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-19</div><div class="story-name">KI-Assistenz Chat (kontextsensitiv) <span class="story-badge sb-ki">KI</span></div></div>
-        <div class="olp-bars" data-key="p3_chat"></div>
-      </div>
-
-      <div class="optional-row" id="opt-row-ki-hints" onclick="toggleOptional('cb-ki-hints')">
-        <input type="checkbox" id="cb-ki-hints" onclick="event.stopPropagation(); toggleOptional('cb-ki-hints')">
-        <div>
-          <div class="opt-name">KI-Vorschläge für Führungshinweise <span class="story-badge sb-ki">KI</span></div>
-          <div class="opt-desc">Automatische KI-Hinweise zu US-06 (US-06b) — optional zubuchbar</div>
-        </div>
-        <div class="olp-bars" data-key="p3_ki_hints" style="margin-left:auto"></div>
-      </div>
-
-      <div class="optional-row" id="opt-row-smart" onclick="toggleOptional('cb-smart')">
-        <input type="checkbox" id="cb-smart" onclick="event.stopPropagation(); toggleOptional('cb-smart')">
-        <div>
-          <div class="opt-name">SMART-Check per KI-Dialog <span class="story-badge sb-ki">KI</span></div>
-          <div class="opt-desc">Geführter KI-Dialog zur Zielformulierung (US-16b) — optional zubuchbar</div>
-        </div>
-        <div class="olp-bars" data-key="p3_smart" style="margin-left:auto"></div>
-      </div>
-
-      <div class="story-card">
-        <div><div class="story-id">US-21</div><div class="story-name">Datenmigration V2 → V3</div></div>
-        <div class="olp-bars" data-key="p3_migration"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-22</div><div class="story-name">Audit-Log &amp; Monitoring</div></div>
-        <div class="olp-bars" data-key="p3_audit"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-23</div><div class="story-name">Feldverschlüsselung personenbezogener Daten</div></div>
-        <div class="olp-bars" data-key="p3_crypt"></div>
-      </div>
-      <div class="story-card">
-        <div><div class="story-id">US-24</div><div class="story-name">Abnahme, Launch &amp; Dokumentation</div></div>
-        <div class="olp-bars" data-key="p3_launch"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── SIMULATION ── -->
-  <section class="sim-section" id="simulation">
-    <div class="phase-badge badge-1" style="margin-bottom:10px">Kostenverteilung</div>
-    <div class="sim-title">Monte-Carlo-Simulation</div>
-    <div class="sim-desc">50.000 Simulationen · Dreiecksverteilung pro Story · Stundensatz auf Anfrage</div>
-
-    <div class="chart-box">
-      <h3>Wahrscheinlichkeitsverteilung der Gesamtkosten</h3>
-      <p>P10 (optimistisch) · P50 (Planungswert) · P90 (konservativ)</p>
-      <div class="chart-wrap">
-        <canvas id="chart"></canvas>
-      </div>
-    </div>
-
-    <div class="breakdown-box">
-      <h3>Kostenaufteilung nach Phase (P50-Wert)</h3>
-      <div id="breakdown"></div>
-    </div>
-
-    <div class="methodik" id="methodik">
-      <h3>Methodik</h3>
-      <p>
-        Jede User Story wird mit drei Aufwandsszenarien bewertet: <strong>Optimistisch (O)</strong>,
-        <strong>Wahrscheinlich (L)</strong> und <strong>Pessimistisch (P)</strong>.
-        Die Monte-Carlo-Simulation zieht je Simulation aus jeder aktiven Story einen Zufallswert
-        gemäß Dreiecksverteilung und summiert die Gesamtkosten.
-      </p>
-      <p>
-        <strong>P10</strong>: In 90 % aller Simulationen liegen die Kosten darüber —
-        günstigster realistischer Verlauf.<br>
-        <strong>P50</strong>: Median, geeignet als Planungswert.<br>
-        <strong>P90</strong>: In nur 10 % aller Simulationen liegen die Kosten darüber —
-        konservativer Puffer für unbekannte Risiken.
-      </p>
-    </div>
-  </section>
-
-</div><!-- /content -->
-
+<script src="shared.js"></script>
 <script>
-// ── STORY DATA ──────────────────────────────────
-const RATE = 200;
-const MAX_HOURS = 40; // for bar scaling per story
+const COLORS = { 1: '#2D5BE3', 2: '#16A34A', 3: '#7C3AED' };
 
-const stories = {
-  p1_arch:      { phase: 1, min: 8,  likely: 13, max: 20, type: 'required' },
-  p1_auth:      { phase: 1, min: 4,  likely: 8,  max: 14, type: 'required' },
-  p1_org:       { phase: 1, min: 6,  likely: 10, max: 18, type: 'required' },
-  p1_orgchart:  { phase: 1, min: 8,  likely: 16, max: 24, type: 'optional', controlId: 'cb-orgchart' },
-  p1_meta_std:  { phase: 1, min: 8,  likely: 16, max: 24, type: 'choice',   choiceGroup: 'meta', choiceVal: 'std' },
-  p1_meta_prem: { phase: 1, min: 14, likely: 24, max: 36, type: 'choice',   choiceGroup: 'meta', choiceVal: 'prem' },
-  p1_leit_std:  { phase: 1, min: 6,  likely: 12, max: 18, type: 'choice',   choiceGroup: 'leit', choiceVal: 'std' },
-  p1_leit_prem: { phase: 1, min: 4,  likely: 8,  max: 14, type: 'choice',   choiceGroup: 'leit', choiceVal: 'prem' },
-  p1_hints:     { phase: 1, min: 6,  likely: 10, max: 16, type: 'required' },
-  p1_vers:      { phase: 1, min: 10, likely: 18, max: 28, type: 'required' },
-  p1_qr:        { phase: 1, min: 3,  likely: 6,  max: 10, type: 'required' },
-  p1_priv:      { phase: 1, min: 4,  likely: 8,  max: 14, type: 'required' },
-  p1_ui:        { phase: 1, min: 4,  likely: 8,  max: 14, type: 'required' },
-  p2_prep:      { phase: 2, min: 8,  likely: 16, max: 24, type: 'phase-required' },
-  p2_align:     { phase: 2, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
-  p2_final:     { phase: 2, min: 3,  likely: 6,  max: 10, type: 'phase-required' },
-  p2_goals:     { phase: 2, min: 6,  likely: 10, max: 16, type: 'phase-required' },
-  p2_todos:     { phase: 2, min: 6,  likely: 12, max: 18, type: 'phase-required' },
-  p2_tmpl:      { phase: 2, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
-  p3_anon:      { phase: 3, min: 7,  likely: 14, max: 22, type: 'phase-required' },
-  p3_ki_meta:   { phase: 3, min: 12, likely: 26, max: 38, type: 'phase-required' },
-  p3_staerken:  { phase: 3, min: 12, likely: 21, max: 34, type: 'phase-required' },
-  p3_ki_hints:  { phase: 3, min: 8,  likely: 12, max: 18, type: 'optional', controlId: 'cb-ki-hints' },
-  p3_smart:     { phase: 3, min: 6,  likely: 10, max: 16, type: 'optional', controlId: 'cb-smart' },
-  p3_chat:      { phase: 3, min: 8,  likely: 16, max: 27, type: 'phase-required' },
-  p3_migration: { phase: 3, min: 14, likely: 22, max: 36, type: 'phase-required' },
-  p3_audit:     { phase: 3, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
-  p3_crypt:     { phase: 3, min: 4,  likely: 8,  max: 14, type: 'phase-required' },
-  p3_launch:    { phase: 3, min: 8,  likely: 14, max: 22, type: 'phase-required' },
-};
-
-const state = {
-  phases: { 2: true, 3: true },
-  choices: { meta: 'std', leit: 'std' },
-  optionals: { 'cb-orgchart': false, 'cb-ki-hints': false, 'cb-smart': false }
-};
-
-const phaseColors = { 1: '#2D5BE3', 2: '#16A34A', 3: '#7C3AED' };
-const phaseNames = { 1: 'Phase 1 — Fundament', 2: 'Phase 2 — Zusammenarbeit', 3: 'Phase 3 — KI & Launch' };
-
-// ── MONTE CARLO ──────────────────────────────────
-function triangular(min, likely, max) {
-  const u = Math.random();
-  const fc = (likely - min) / (max - min);
-  if (u < fc) return min + Math.sqrt(u * (max - min) * (likely - min));
-  return max - Math.sqrt((1 - u) * (max - min) * (max - likely));
+function renderList(phase, state) {
+  const active = Object.entries(STORIES).filter(([k, s]) => s.phase === phase && isActive(k, s, state));
+  const maxPT = Math.max(...active.map(([, s]) => s.likely / 8), 1);
+  const container = document.getElementById(`list-p${phase}`);
+  container.innerHTML = active.map(([, s]) => {
+    const pt = s.likely / 8;
+    const pct = (pt / maxPT * 100).toFixed(0);
+    return `<div class="sprint-row">
+      <span class="s-id">${s.id}</span>
+      <span class="s-name">${s.name}</span>
+      <div class="s-bar-wrap"><div class="s-bar" style="width:${pct}%;background:${COLORS[phase]}"></div></div>
+      <span class="s-pt">${fmtPT(s.likely)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById(`count-p${phase}`).textContent = `${active.length} Bausteine`;
 }
 
-function getActiveStories() {
-  return Object.entries(stories).filter(([, s]) => {
-    if (s.type === 'required') return true;
-    if (s.type === 'phase-required') return state.phases[s.phase] !== false;
-    if (s.type === 'choice') {
-      const phaseActive = s.phase === 1 ? true : state.phases[s.phase] !== false;
-      return phaseActive && state.choices[s.choiceGroup] === s.choiceVal;
-    }
-    if (s.type === 'optional') {
-      const phaseActive = s.phase === 1 ? true : state.phases[s.phase] !== false;
-      return phaseActive && state.optionals[s.controlId];
-    }
-    return false;
-  });
-}
-
-function simulate(n = 50000) {
-  const active = getActiveStories();
-  const results = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    let total = 0;
-    for (const [, s] of active) total += triangular(s.min, s.likely, s.max);
-    results[i] = total * RATE;
-  }
-  results.sort();
-  return results;
-}
-
-function percentile(sorted, p) {
-  return sorted[Math.floor(sorted.length * p / 100)];
-}
-
-function phaseLikely(phase) {
-  return Object.values(stories)
-    .filter(s => {
-      if (s.phase !== phase) return false;
-      if (s.type === 'required') return true;
-      if (s.type === 'phase-required') return state.phases[phase] !== false;
-      if (s.type === 'choice') {
-        const pa = phase === 1 ? true : state.phases[phase] !== false;
-        return pa && state.choices[s.choiceGroup] === s.choiceVal;
-      }
-      if (s.type === 'optional') {
-        const pa = phase === 1 ? true : state.phases[phase] !== false;
-        return pa && state.optionals[s.controlId];
-      }
-      return false;
-    })
-    .reduce((sum, s) => sum + s.likely, 0) * RATE;
-}
-
-// ── OLP BARS ──────────────────────────────────
-function fmt(n) {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
-}
-
-function renderOlpBars() {
-  document.querySelectorAll('.olp-bars[data-key]').forEach(el => {
-    const key = el.dataset.key;
-    const s = stories[key];
-    if (!s) return;
-    const scale = Math.max(s.max, 36); // scale relative to at least 36h
-    const colorClass = `bf-${s.phase}`;
-    el.innerHTML = `
-      <div class="olp-bars">
-        <div class="olp-row">
-          <span class="olp-label">O</span>
-          <div class="bar-track"><div class="bar-fill ${colorClass}" style="width:${(s.min/scale*100).toFixed(1)}%"></div></div>
-          <span class="olp-cost">${fmt(s.min * RATE)}</span>
-        </div>
-        <div class="olp-row featured">
-          <span class="olp-label">L</span>
-          <div class="bar-track"><div class="bar-fill ${colorClass}" style="width:${(s.likely/scale*100).toFixed(1)}%"></div></div>
-          <span class="olp-cost">${fmt(s.likely * RATE)}</span>
-        </div>
-        <div class="olp-row">
-          <span class="olp-label">P</span>
-          <div class="bar-track"><div class="bar-fill ${colorClass}" style="width:${(s.max/scale*100).toFixed(1)}%"></div></div>
-          <span class="olp-cost">${fmt(s.max * RATE)}</span>
-        </div>
-      </div>`;
-  });
-}
-
-// ── CHART ──────────────────────────────────
-let chartInstance = null;
-
-function buildHistogram(sorted, bins = 40) {
-  const min = sorted[0], max = sorted[sorted.length - 1];
-  const step = (max - min) / bins;
-  const counts = new Array(bins).fill(0);
-  const labels = [];
-  for (let i = 0; i < bins; i++) labels.push(Math.round(min + i * step));
-  for (const v of sorted) {
-    const idx = Math.min(Math.floor((v - min) / step), bins - 1);
-    counts[idx]++;
-  }
-  return { labels, counts, step };
-}
-
+let chartInst = null;
 function renderChart(sorted, p10, p50, p90) {
-  const { labels, counts } = buildHistogram(sorted);
-  const colors = labels.map(v => {
-    if (v < p10) return 'rgba(45,91,227,0.25)';
-    if (v < p50) return 'rgba(45,91,227,0.55)';
-    if (v < p90) return 'rgba(45,91,227,0.4)';
-    return 'rgba(45,91,227,0.15)';
-  });
-
+  const bins = 40, min = sorted[0], max = sorted[sorted.length-1], step = (max-min)/bins;
+  const counts = new Array(bins).fill(0), labels = [];
+  for (let i = 0; i < bins; i++) labels.push(Math.round(min + i * step));
+  for (const v of sorted) counts[Math.min(Math.floor((v-min)/step), bins-1)]++;
   const ctx = document.getElementById('chart').getContext('2d');
-  if (chartInstance) chartInstance.destroy();
-
-  chartInstance = new Chart(ctx, {
+  if (chartInst) chartInst.destroy();
+  chartInst = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: labels.map(v => fmt(v)),
-      datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0, borderRadius: 2 }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: items => fmt(labels[items[0].dataIndex]) + ' – ' + fmt(labels[items[0].dataIndex + 1] || labels[items[0].dataIndex]),
-            label: item => `${item.raw} Simulationen`
-          }
-        },
-        annotation: {}
-      },
-      scales: {
-        x: {
-          ticks: {
-            maxTicksLimit: 8,
-            callback: (v, i) => i % 5 === 0 ? fmt(labels[i]) : null,
-            font: { size: 10 }
-          },
-          grid: { display: false }
-        },
-        y: {
-          ticks: { display: false },
-          grid: { color: '#F0EDE5' }
-        }
-      }
-    }
+    data: { labels: labels.map(v => fmt(v)), datasets: [{ data: counts, borderWidth: 0, borderRadius: 2,
+      backgroundColor: labels.map(v => v < p10 ? 'rgba(45,91,227,0.2)' : v < p50 ? 'rgba(45,91,227,0.55)' : v < p90 ? 'rgba(45,91,227,0.35)' : 'rgba(45,91,227,0.15)') }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { ticks: { maxTicksLimit: 8, callback: (v, i) => i % 5 === 0 ? fmt(labels[i]) : null, font: { size: 10 } }, grid: { display: false } },
+                y: { ticks: { display: false }, grid: { color: '#F0EDE5' } } } }
   });
 }
 
-function renderBreakdown(p50Total) {
-  const phases = [1, 2, 3].filter(p => p === 1 || state.phases[p] !== false);
-  const likely = phases.map(p => ({ p, val: phaseLikely(p) }));
-  const total = likely.reduce((s, x) => s + x.val, 0);
-  const container = document.getElementById('breakdown');
-  container.innerHTML = likely.map(({ p, val }) => `
-    <div class="bd-row">
-      <div class="bd-dot" style="background:${phaseColors[p]}"></div>
-      <div class="bd-label">${phaseNames[p]}</div>
-      <div class="bd-track"><div class="bd-fill" style="width:${(val/total*100).toFixed(1)}%;background:${phaseColors[p]}"></div></div>
-      <div class="bd-val">${fmt(val)}</div>
-    </div>`).join('');
-}
-
-// ── RENDER ──────────────────────────────────
 function render() {
-  renderOlpBars();
-  const sorted = simulate();
-  const p10 = percentile(sorted, 10);
-  const p50 = percentile(sorted, 50);
-  const p90 = percentile(sorted, 90);
+  const state = loadState();
+  [1, 2, 3].forEach(p => {
+    renderList(p, state);
+    document.getElementById(`price-p${p}`).textContent = fmt(phaseLikely(p, state));
+  });
+  if (!state.phase2) { document.getElementById('badge-p2').textContent = 'Phase 2 · Nicht enthalten'; document.getElementById('box-p2').classList.add('off'); }
+  if (!state.phase3) { document.getElementById('badge-p3').textContent = 'Phase 3 · Nicht enthalten'; document.getElementById('box-p3').classList.add('off'); }
 
-  document.getElementById('hero-p10').textContent = fmt(p10);
-  document.getElementById('hero-p50').textContent = fmt(p50);
-  document.getElementById('hero-p90').textContent = fmt(p90);
-  document.getElementById('nav-total').textContent = fmt(p50) + ' (P50)';
-
+  const active = Object.entries(STORIES).filter(([k, s]) => isActive(k, s, state)).map(([, s]) => s);
+  if (!active.length) return;
+  const sorted = simulate(active);
+  const p10 = percentile(sorted, 10), p50 = percentile(sorted, 50), p90 = percentile(sorted, 90);
+  document.getElementById('total-p10').textContent = fmt(p10);
+  document.getElementById('total-p50').textContent = fmt(p50);
+  document.getElementById('total-p90').textContent = fmt(p90);
+  document.getElementById('nav-total').textContent = `Gesamt: ${fmt(p50)}`;
   renderChart(sorted, p10, p50, p90);
-  renderBreakdown(p50);
 }
 
-// ── INTERACTIONS ──────────────────────────────────
-function togglePhase(n) {
-  // Phase 3 requires Phase 2
-  if (n === 2 && state.phases[2]) {
-    state.phases[2] = false;
-    state.phases[3] = false;
-    document.getElementById('toggle-p2').classList.remove('on');
-    document.getElementById('toggle-p3').classList.remove('on');
-    document.getElementById('lbl-p2').textContent = 'Nicht enthalten';
-    document.getElementById('lbl-p3').textContent = 'Nicht enthalten';
-    document.getElementById('stories-p2').style.opacity = '0.35';
-    document.getElementById('stories-p3').style.opacity = '0.35';
-  } else if (n === 2 && !state.phases[2]) {
-    state.phases[2] = true;
-    document.getElementById('toggle-p2').classList.add('on');
-    document.getElementById('lbl-p2').textContent = 'Enthalten';
-    document.getElementById('stories-p2').style.opacity = '';
-  } else if (n === 3 && state.phases[3]) {
-    state.phases[3] = false;
-    document.getElementById('toggle-p3').classList.remove('on');
-    document.getElementById('lbl-p3').textContent = 'Nicht enthalten';
-    document.getElementById('stories-p3').style.opacity = '0.35';
-  } else if (n === 3 && !state.phases[3]) {
-    if (!state.phases[2]) {
-      state.phases[2] = true;
-      document.getElementById('toggle-p2').classList.add('on');
-      document.getElementById('lbl-p2').textContent = 'Enthalten';
-      document.getElementById('stories-p2').style.opacity = '';
-    }
-    state.phases[3] = true;
-    document.getElementById('toggle-p3').classList.add('on');
-    document.getElementById('lbl-p3').textContent = 'Enthalten';
-    document.getElementById('stories-p3').style.opacity = '';
-  }
-  render();
-}
-
-function selectChoice(group, val) {
-  state.choices[group] = val;
-  // Enforce: leit-prem requires meta-prem
-  if (group === 'meta' && val === 'std' && state.choices.leit === 'prem') {
-    state.choices.leit = 'std';
-    document.querySelector('input[name=leit][value=std]').checked = true;
-    document.getElementById('opt-leit-std').classList.add('selected');
-    document.getElementById('opt-leit-prem').classList.remove('selected');
-  }
-  document.querySelector(`input[name=${group}][value=${val}]`).checked = true;
-  document.getElementById(`opt-${group}-std`).classList.toggle('selected', val === 'std');
-  document.getElementById(`opt-${group}-prem`).classList.toggle('selected', val === 'prem');
-  render();
-}
-
-function toggleOptional(id) {
-  state.optionals[id] = !state.optionals[id];
-  const cb = document.getElementById(id);
-  if (cb) cb.checked = state.optionals[id];
-  const row = document.getElementById('opt-row-' + id.replace('cb-', '').replace(/-/g, '-'));
-  if (row) row.classList.toggle('checked', state.optionals[id]);
-  render();
-}
-
-// ── INIT ──────────────────────────────────
 render();
 </script>
 </body>

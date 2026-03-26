@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 2 — LOS V3</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #F9F7F2; --paper-dark: #F0EDE5; --ink: #1A1A1A; --ink-soft: #4A4A4A;
+      --ink-faint: #8A8A8A; --rule: #D8D3C8; --phase: #16A34A; --phase-bg: #F0FDF4;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(249,247,242,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .nav-back { font-size: 13px; color: var(--phase); text-decoration: none; font-weight: 600; }
+    .nav-back:hover { text-decoration: underline; }
+    .nav-title { font-size: 13px; color: var(--ink-soft); }
+    .nav-total { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--ink); }
+
+    .content { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .phase-header { padding: 44px 0 32px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+    .phase-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: var(--phase-bg); color: var(--phase); margin-bottom: 10px; }
+    .phase-header h1 { font-family: Georgia, serif; font-size: clamp(24px, 4vw, 34px); font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+    .phase-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
+
+    .phase-switch { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding: 14px 18px; background: white; border: 1px solid var(--rule); border-radius: 8px; }
+    .toggle { width: 40px; height: 22px; background: var(--rule); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle.on { background: var(--phase); }
+    .toggle.locked { cursor: default; opacity: 0.7; }
+    .toggle::after { content:''; position:absolute; width:18px; height:18px; background:white; border-radius:50%; top:2px; left:2px; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on::after { transform: translateX(18px); }
+    .phase-switch-label { font-size: 14px; font-weight: 600; }
+    .phase-switch-note { font-size: 12px; color: var(--ink-soft); }
+
+    .stories { display: flex; flex-direction: column; gap: 10px; }
+    .stories.off { opacity: 0.4; pointer-events: none; }
+
+    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+    .story-card.inactive { opacity: 0.45; }
+
+    .sc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 18px 0; }
+    .sc-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .sc-id { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .sc-name { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .sc-desc { font-size: 13px; color: var(--ink-soft); padding: 0 18px 10px; line-height: 1.6; }
+
+    .sc-toggle { flex-shrink: 0; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .toggle-label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+    .sc-steps { padding: 8px 18px 14px; }
+    .sc-steps-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 6px; }
+    .sc-steps ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .sc-steps li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
+    .sc-steps li::before { content: '·'; position: absolute; left: 3px; color: var(--phase); font-weight: 700; }
+
+    .sc-pt { display: flex; gap: 16px; padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--rule); }
+    .pt-item { display: flex; flex-direction: column; }
+    .pt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .pt-value { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .pt-item.featured .pt-value { color: var(--phase); }
+    .pt-item.featured .pt-label { color: var(--phase); }
+
+    .phase-total { background: white; border: 1px solid var(--rule); border-radius: 10px; padding: 24px; margin-top: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .pt-label-big { font-family: Georgia, serif; font-size: 16px; font-weight: 700; }
+    .pt-values { display: flex; gap: 24px; }
+    .ptv { text-align: center; }
+    .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
+    .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
+    .ptv.featured .ptv-value { color: var(--phase); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">← Übersicht</a>
+  <span class="nav-title">Phase 2 · Zusammenarbeit &amp; Verbindlichkeit</span>
+  <div class="nav-total" id="nav-total">—</div>
+</nav>
+
+<div class="content">
+  <div class="phase-header">
+    <div class="phase-badge">Phase 2</div>
+    <h1>Zusammenarbeit &amp; Verbindlichkeit</h1>
+    <p>Strukturierte Gesprächsvorbereitung, Zielmanagement und ToDo-Verfolgung. Alle Bausteine können einzeln konfiguriert werden.</p>
+    <div class="phase-switch">
+      <div class="toggle" id="phase-toggle" onclick="togglePhase()"></div>
+      <div>
+        <div class="phase-switch-label" id="phase-label">Phase enthalten</div>
+        <div class="phase-switch-note">Schaltet alle Bausteine dieser Phase ein oder aus</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stories" id="stories">
+
+    <!-- US-13 -->
+    <div class="story-card" id="card-p2_prep">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-13</span></div><div class="sc-name">Gesprächsvorbereitung</div></div>
+        <div class="sc-toggle" onclick="toggle('p2_prep')"><div class="toggle on" id="t-p2_prep"></div><span class="toggle-label" id="lbl-p2_prep">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Führungskraft und Mitarbeiter bereiten das Gespräch asynchron vor. Jeder füllt seinen Teil aus — der andere sieht ihn erst beim gemeinsamen Abgleich.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Gespräch anlegen mit Template-Auswahl</li>
+        <li>Führungskraft füllt ihren Teil aus</li>
+        <li>Mitarbeiter füllt seinen Teil aus (Sichtsperre bis zum Abgleich)</li>
+        <li>Status-Tracking: Entwurf · Bereit · Abgeschlossen</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">2 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">3 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-14 -->
+    <div class="story-card" id="card-p2_align">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-14</span></div><div class="sc-name">Gesprächsabgleich &amp; Terminplanung</div></div>
+        <div class="sc-toggle" onclick="toggle('p2_align')"><div class="toggle on" id="t-p2_align"></div><span class="toggle-label" id="lbl-p2_align">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Beide Perspektiven werden nebeneinander angezeigt. Statuswechsel, Terminkoordination und Benachrichtigung bei Änderungen.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Nebeneinander-Ansicht beider Vorbereitungen</li>
+        <li>Statuswechsel und Freigabe</li>
+        <li>Terminplanung direkt im Gespräch</li>
+        <li>Benachrichtigung bei Statusänderung</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-15 -->
+    <div class="story-card" id="card-p2_final">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-15</span></div><div class="sc-name">Finale Version &amp; Druckansicht</div></div>
+        <div class="sc-toggle" onclick="toggle('p2_final')"><div class="toggle on" id="t-p2_final"></div><span class="toggle-label" id="lbl-p2_final">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Das abgeschlossene Gespräch wird bei beiden Parteien abgelegt. Druckversion direkt aus dem Browser, read-only für den Mitarbeiter nach Abschluss.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Finale Version beidseitig ablegen</li>
+        <li>Read-only-Modus für Mitarbeiter nach Abschluss</li>
+        <li>Druckansicht via Browser-Print</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-16 -->
+    <div class="story-card" id="card-p2_goals">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-16</span></div><div class="sc-name">Zielmanagement</div></div>
+        <div class="sc-toggle" onclick="toggle('p2_goals')"><div class="toggle on" id="t-p2_goals"></div><span class="toggle-label" id="lbl-p2_goals">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Ziele pro Person mit Status-Tracking. Verknüpfung zum Gespräch, Warnung bei Zielen ohne Maßnahmen.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Ziele erfassen (SMART-Felder)</li>
+        <li>Verknüpfung zum Gespräch</li>
+        <li>Status: Offen · In Bearbeitung · Erreicht</li>
+        <li>Warnung bei Zielen ohne Maßnahmen</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-17 -->
+    <div class="story-card" id="card-p2_todos">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-17</span></div><div class="sc-name">ToDo-Engine</div></div>
+        <div class="sc-toggle" onclick="toggle('p2_todos')"><div class="toggle on" id="t-p2_todos"></div><span class="toggle-label" id="lbl-p2_todos">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Aufgaben mit Verantwortlichem, Deadline und Überfälligkeitsanzeige. Zentraler Überblick über alle ToDos aus dem Gesprächskontext.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>ToDo anlegen: Verantwortlicher + Deadline</li>
+        <li>Owner: Führungskraft oder Mitarbeiter</li>
+        <li>Überfälligkeitsanzeige und Erinnerungslogik</li>
+        <li>ToDo-Zentrale: Meine / MA / Überfällige</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+      </div>
+    </div>
+
+    <!-- US-18 -->
+    <div class="story-card" id="card-p2_tmpl">
+      <div class="sc-head">
+        <div><div class="sc-meta"><span class="sc-id">US-18</span></div><div class="sc-name">Template-System</div></div>
+        <div class="sc-toggle" onclick="toggle('p2_tmpl')"><div class="toggle on" id="t-p2_tmpl"></div><span class="toggle-label" id="lbl-p2_tmpl">Enthalten</span></div>
+      </div>
+      <div class="sc-desc">Gesprächsvorlagen als Markdown — pro Mandant anpassbar. Standardvorlagen sind enthalten, eigene können hochgeladen werden.</div>
+      <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+        <li>Standardvorlagen mitliefern (Entwicklungsgespräch, Zielvereinbarung, 1:1)</li>
+        <li>Upload eigener Vorlagen als Markdown</li>
+        <li>Pro Mandant isoliert konfigurierbar</li>
+      </ul></div>
+      <div class="sc-pt">
+        <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+        <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+        <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="phase-total">
+    <div class="pt-label-big">Phase 2 gesamt</div>
+    <div class="pt-values">
+      <div class="ptv"><div class="ptv-label">Optimistisch</div><div class="ptv-value" id="tot-min">—</div></div>
+      <div class="ptv featured"><div class="ptv-label">Wahrscheinlich</div><div class="ptv-value" id="tot-likely">—</div></div>
+      <div class="ptv"><div class="ptv-label">Konservativ</div><div class="ptv-value" id="tot-max">—</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const state = loadState();
+const KEYS = ['p2_prep','p2_align','p2_final','p2_goals','p2_todos','p2_tmpl'];
+
+function applyState() {
+  const phaseOn = !!state.phase2;
+  const pt = document.getElementById('phase-toggle');
+  pt.classList.toggle('on', phaseOn);
+  document.getElementById('phase-label').textContent = phaseOn ? 'Phase enthalten' : 'Phase nicht enthalten';
+  document.getElementById('stories').classList.toggle('off', !phaseOn);
+
+  KEYS.forEach(key => {
+    const on = !!state[key];
+    const t = document.getElementById(`t-${key}`);
+    const l = document.getElementById(`lbl-${key}`);
+    if (t) t.classList.toggle('on', on);
+    if (l) l.textContent = on ? 'Enthalten' : 'Nicht enthalten';
+    const card = document.getElementById(`card-${key}`);
+    if (card) card.classList.toggle('inactive', !on);
+  });
+
+  updateTotal();
+}
+
+function togglePhase() {
+  state.phase2 = !state.phase2;
+  if (!state.phase2) state.phase3 = false;
+  saveState(state);
+  applyState();
+}
+
+function toggle(key) {
+  state[key] = !state[key];
+  saveState(state);
+  applyState();
+}
+
+function updateTotal() {
+  const active = Object.entries(STORIES).filter(([k, s]) => s.phase === 2 && isActive(k, s, state));
+  const min = active.reduce((s, [, x]) => s + x.min, 0) * RATE;
+  const likely = active.reduce((s, [, x]) => s + x.likely, 0) * RATE;
+  const max = active.reduce((s, [, x]) => s + x.max, 0) * RATE;
+  document.getElementById('tot-min').textContent = fmt(min);
+  document.getElementById('tot-likely').textContent = fmt(likely);
+  document.getElementById('tot-max').textContent = fmt(max);
+  document.getElementById('nav-total').textContent = fmt(likely);
+}
+
+applyState();
+</script>
+</body>
+</html>

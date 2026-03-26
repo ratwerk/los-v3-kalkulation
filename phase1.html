@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1 — LOS V3</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #F9F7F2; --paper-dark: #F0EDE5; --ink: #1A1A1A; --ink-soft: #4A4A4A;
+      --ink-faint: #8A8A8A; --rule: #D8D3C8; --phase: #2D5BE3; --phase-bg: #EEF2FC;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(249,247,242,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .nav-back { font-size: 13px; color: var(--phase); text-decoration: none; font-weight: 600; }
+    .nav-back:hover { text-decoration: underline; }
+    .nav-title { font-size: 13px; color: var(--ink-soft); }
+    .nav-total { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--ink); }
+
+    .content { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .phase-header { padding: 44px 0 32px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+    .phase-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: var(--phase-bg); color: var(--phase); margin-bottom: 10px; }
+    .phase-header h1 { font-family: Georgia, serif; font-size: clamp(24px, 4vw, 34px); font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+    .phase-header p { font-size: 15px; color: var(--ink-soft); max-width: 540px; }
+
+    /* STORY CARDS */
+    .story-card { background: white; border: 1px solid var(--rule); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .story-card.inactive { opacity: 0.45; }
+
+    .sc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 18px 0; }
+    .sc-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .sc-id { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .sc-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; }
+    .badge-req { background: var(--phase-bg); color: var(--phase); }
+    .badge-prem { background: #F5F3FF; color: #7C3AED; }
+    .badge-opt { background: #FEF3C7; color: #B45309; }
+    .sc-name { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .sc-desc { font-size: 13px; color: var(--ink-soft); padding: 0 18px 10px; line-height: 1.6; }
+
+    .sc-toggle { flex-shrink: 0; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .toggle { width: 38px; height: 21px; background: var(--rule); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle.on { background: var(--phase); }
+    .toggle.locked { cursor: default; opacity: 0.7; }
+    .toggle::after { content:''; position: absolute; width:17px; height:17px; background:white; border-radius:50%; top:2px; left:2px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on::after { transform: translateX(17px); }
+    .toggle-label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+    .sc-steps { padding: 8px 18px 14px; }
+    .sc-steps-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 6px; }
+    .sc-steps ul { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .sc-steps li { font-size: 13px; color: var(--ink-soft); padding-left: 14px; position: relative; }
+    .sc-steps li::before { content: '·'; position: absolute; left: 3px; color: var(--phase); font-weight: 700; }
+
+    .sc-pt { display: flex; gap: 16px; padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--rule); }
+    .pt-item { display: flex; flex-direction: column; }
+    .pt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+    .pt-value { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .pt-item.featured .pt-value { color: var(--phase); }
+    .pt-item.featured .pt-label { color: var(--phase); }
+
+    /* CHOICE GROUP */
+    .choice-group { background: white; border: 1px solid var(--rule); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .cg-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); background: var(--paper-dark); padding: 8px 16px; border-bottom: 1px solid var(--rule); }
+    .choice-opt { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; cursor: pointer; border-bottom: 1px solid var(--rule); background: white; transition: background 0.1s; }
+    .choice-opt:last-child { border-bottom: none; }
+    .choice-opt:hover { background: var(--paper); }
+    .choice-opt.selected { background: var(--phase-bg); }
+    .choice-opt input[type=radio] { accent-color: var(--phase); flex-shrink: 0; margin-top: 3px; cursor: pointer; }
+    .co-right { flex: 1; }
+    .co-name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .co-desc { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
+    .co-steps { list-style: none; display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+    .co-steps li { font-size: 12px; color: var(--ink-soft); padding-left: 12px; position: relative; }
+    .co-steps li::before { content: '·'; position: absolute; left: 2px; color: var(--phase); font-weight: 700; }
+    .co-pt { display: flex; gap: 12px; }
+    .co-pt-item { font-size: 11px; color: var(--ink-faint); }
+    .co-pt-item.featured { color: var(--phase); font-weight: 700; }
+    .co-preview { font-size: 12px; color: var(--phase); font-weight: 600; text-decoration: none; }
+    .co-preview:hover { text-decoration: underline; }
+
+    /* SECTION LABEL */
+    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin: 24px 0 10px; }
+
+    /* TOTAL */
+    .phase-total { background: white; border: 1px solid var(--rule); border-radius: 10px; padding: 24px; margin-top: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .pt-label-big { font-family: Georgia, serif; font-size: 16px; font-weight: 700; }
+    .pt-values { display: flex; gap: 24px; }
+    .ptv { text-align: center; }
+    .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
+    .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
+    .ptv.featured .ptv-value { color: var(--phase); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">← Übersicht</a>
+  <span class="nav-title">Phase 1 · Das digitale Führungsprofil</span>
+  <div class="nav-total" id="nav-total">—</div>
+</nav>
+
+<div class="content">
+  <div class="phase-header">
+    <div class="phase-badge">Phase 1 · Immer enthalten</div>
+    <h1>Das digitale Führungsprofil</h1>
+    <p>Technisches Fundament, Login, Organisationsstruktur und das zentrale Merkmalsprofil. Diese Phase ist immer Bestandteil des Projekts.</p>
+  </div>
+
+  <div class="section-label">Technisches Fundament</div>
+
+  <!-- US-01 -->
+  <div class="story-card" id="card-p1_arch">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-01</span><span class="sc-badge badge-req">Pflicht</span></div><div class="sc-name">Mandanten-Architektur &amp; BFF</div></div>
+      <div class="sc-toggle"><div class="toggle on locked"></div><span class="toggle-label">Pflicht</span></div>
+    </div>
+    <div class="sc-desc">Jedes Unternehmen erhält einen isolierten, sicheren Bereich. Alle Zugriffe laufen über eine serverseitige Backend-Schicht — kein direkter Datenbankzugriff vom Browser.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Datenbankschema mit Mandantenstruktur aufsetzen (tenant_id auf allen Tabellen)</li>
+      <li>Backend-Schicht (BFF) einrichten — alle API-Endpunkte laufen über den Server</li>
+      <li>Drei Umgebungen anlegen: Entwicklung, Test, Produktion</li>
+      <li>Logging und Fehlerhandling implementieren</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+    </div>
+  </div>
+
+  <!-- US-02 -->
+  <div class="story-card" id="card-p1_auth">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-02</span><span class="sc-badge badge-req">Pflicht</span></div><div class="sc-name">Login &amp; Benutzerrollen</div></div>
+      <div class="sc-toggle"><div class="toggle on locked"></div><span class="toggle-label">Pflicht</span></div>
+    </div>
+    <div class="sc-desc">Vier Rollen mit genau definierten Rechten: Admin, OrganisationsAdmin, Führungskraft und Mitarbeiter. Nur der Admin legt neue Benutzer an — keine Selbstregistrierung.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Login via Supabase Auth konfigurieren</li>
+      <li>Vier Rollen mit Berechtigungsmatrix definieren</li>
+      <li>Admin-Oberfläche: Benutzer anlegen und Rollen zuweisen</li>
+      <li>Zugriffsprüfung im BFF für alle Endpunkte</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+    </div>
+  </div>
+
+  <!-- US-03 -->
+  <div class="story-card" id="card-p1_org">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-03</span><span class="sc-badge badge-req">Pflicht</span></div><div class="sc-name">Organisationsstruktur &amp; Profile</div></div>
+      <div class="sc-toggle"><div class="toggle on locked"></div><span class="toggle-label">Pflicht</span></div>
+    </div>
+    <div class="sc-desc">Mitarbeitende erfassen, Hierarchie und Reporting-Lines abbilden. Jede Person erhält eine zentrale Profilseite. OrganisationsAdmin sieht nur Struktur, keine inhaltlichen Daten.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Datenmodell für Mitarbeitende, Hierarchie und Teams</li>
+      <li>Oberfläche zum Erfassen und Verwalten von Personen</li>
+      <li>Reporting-Lines und Hierarchieebenen abbilden</li>
+      <li>Zentrale Profilseite pro Person aufbauen</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2,5 PT</div></div>
+    </div>
+  </div>
+
+  <!-- US-03b optional -->
+  <div class="story-card" id="card-p1_orgchart">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-03b</span><span class="sc-badge badge-prem">Premium</span></div><div class="sc-name">Organigramm-Ansicht</div></div>
+      <div class="sc-toggle" onclick="toggle('p1_orgchart')">
+        <div class="toggle" id="t-p1_orgchart"></div>
+        <span class="toggle-label" id="lbl-p1_orgchart">Nicht enthalten</span>
+      </div>
+    </div>
+    <div class="sc-desc">Visuelle, interaktive Darstellung der Linienhierarchie als Organigramm. Automatisch aus der bestehenden Hierarchiestruktur generiert. Setzt US-03 voraus.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Organigramm-Komponente aufbauen (interaktiv, zoombar)</li>
+      <li>Automatische Generierung aus bestehender Hierarchie</li>
+      <li>Klick auf Person öffnet Profilseite</li>
+      <li>Mobile-optimierte Darstellung</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">2 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">3 PT</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Merkmalsprofil — Sprachmuster (Wählen Sie eine Variante)</div>
+
+  <div class="choice-group">
+    <div class="cg-label">US-04 · 12 Metaprogramme</div>
+    <div class="choice-opt" id="opt-meta-std" onclick="choose('meta','std')">
+      <input type="radio" name="meta" value="std">
+      <div class="co-right">
+        <div class="co-name">Standard — Übersicht &amp; Bearbeitungsmodus</div>
+        <div class="co-desc">Kompakte Übersicht aller 12 Metaprogramme, Wechsel in separaten Bearbeitungsmodus per Klick.</div>
+        <ul class="co-steps">
+          <li>12 Eingabe-Komponenten bauen (Slider bipolar, Toggle, Multi-Select)</li>
+          <li>Übersichtsansicht: alle 12 Metaprogramme kompakt</li>
+          <li>Bearbeitungsmodus: detaillierte Eingabe pro Metaprogramm</li>
+        </ul>
+        <div class="co-pt">
+          <div class="co-pt-item">O: 1 PT</div>
+          <div class="co-pt-item featured">L: 2 PT</div>
+          <div class="co-pt-item">P: 3 PT</div>
+        </div>
+      </div>
+    </div>
+    <div class="choice-opt" id="opt-meta-prem" onclick="choose('meta','prem')">
+      <input type="radio" name="meta" value="prem">
+      <div class="co-right">
+        <div class="co-name">Premium — Split-Layout <span class="sc-badge badge-prem" style="margin-left:6px">Premium</span></div>
+        <div class="co-desc">Übersicht links, Bearbeitung rechts — nebeneinander. Auf dem Smartphone automatisch übereinander. <a href="mockup_splitmode.html" target="_blank" class="co-preview" onclick="event.stopPropagation()">Vorschau ansehen →</a></div>
+        <ul class="co-steps">
+          <li>Split-Layout einrichten: Übersicht links, Bearbeitung rechts</li>
+          <li>Navigation per Klick in der Übersichtsliste</li>
+          <li>Mobile: automatisch übereinander gestapelt</li>
+        </ul>
+        <div class="co-pt">
+          <div class="co-pt-item">O: 1,5 PT</div>
+          <div class="co-pt-item featured">L: 3 PT</div>
+          <div class="co-pt-item">P: 4,5 PT</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Merkmalsprofil — Führungsleitfaden (Wählen Sie eine Variante)</div>
+
+  <div class="choice-group">
+    <div class="cg-label">US-05 · Stärken, Werte, Teamrollen, Steuerungsknöpfe</div>
+    <div class="choice-opt" id="opt-leit-std" onclick="choose('leit','std')">
+      <input type="radio" name="leit" value="std">
+      <div class="co-right">
+        <div class="co-name">Standard — Formularansicht</div>
+        <div class="co-desc">Stärken, Teamrollen, Werte, Führungsphase und Steuerungsknöpfe als strukturiertes Formular.</div>
+        <ul class="co-steps">
+          <li>Felder für Stärken, Teamrollen, Werte, Führungsphase</li>
+          <li>Steuerungsknöpfe als Schieberegler (0–10)</li>
+          <li>Slider-Komponenten aus Sprachmuster wiederverwendet</li>
+        </ul>
+        <div class="co-pt">
+          <div class="co-pt-item">O: 0,5 PT</div>
+          <div class="co-pt-item featured">L: 1,5 PT</div>
+          <div class="co-pt-item">P: 2,5 PT</div>
+        </div>
+      </div>
+    </div>
+    <div class="choice-opt" id="opt-leit-prem" onclick="choose('leit','prem')">
+      <input type="radio" name="leit" value="prem">
+      <div class="co-right">
+        <div class="co-name">Premium — Split-Layout <span class="sc-badge badge-prem" style="margin-left:6px">Premium</span></div>
+        <div class="co-desc">Gleiche Split-Logik wie beim Sprachmuster. Setzt Split-Layout bei Sprachmuster voraus.</div>
+        <ul class="co-steps">
+          <li>Split-Komponente aus Sprachmuster wiederverwenden</li>
+          <li>Navigation konsistent mit Sprachmuster</li>
+        </ul>
+        <div class="co-pt">
+          <div class="co-pt-item">O: 0,5 PT</div>
+          <div class="co-pt-item featured">L: 1 PT</div>
+          <div class="co-pt-item">P: 1,5 PT</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Weitere Bausteine</div>
+
+  <!-- US-06 -->
+  <div class="story-card">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-06</span><span class="sc-badge badge-req">Pflicht</span></div><div class="sc-name">Führungshinweise &amp; Stolpersteine</div></div>
+      <div class="sc-toggle"><div class="toggle on locked"></div><span class="toggle-label">Pflicht</span></div>
+    </div>
+    <div class="sc-desc">Persönliche Notizen der Führungskraft zum Umgang mit der Person. Privacy-Einstellung pro Eintrag — privat oder für das Team sichtbar.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Notizen-Modul pro Person aufbauen</li>
+      <li>Privacy-Einstellung: privat oder für Team sichtbar</li>
+      <li>Systemhinweise aus Metaprogrammen einblenden</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1,5 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">2 PT</div></div>
+    </div>
+  </div>
+
+  <!-- US-07 -->
+  <div class="story-card" id="card-p1_vers">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-07</span></div><div class="sc-name">Versionierung &amp; Restore</div></div>
+      <div class="sc-toggle" onclick="toggle('p1_vers')">
+        <div class="toggle on" id="t-p1_vers"></div>
+        <span class="toggle-label" id="lbl-p1_vers">Enthalten</span>
+      </div>
+    </div>
+    <div class="sc-desc">Alle Änderungen werden automatisch protokolliert. Frühere Versionen können eingesehen und wiederhergestellt werden — für alle Module.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Versionierung bei jeder Änderung (Timestamp + Nummer)</li>
+      <li>Versionshistorie pro Datensatz anzeigen</li>
+      <li>Restore auf frühere Version</li>
+      <li>Gilt für Profile, Gespräche, Ziele und Notizen</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">1,5 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">2,5 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">3,5 PT</div></div>
+    </div>
+  </div>
+
+  <!-- US-10 -->
+  <div class="story-card" id="card-p1_qr">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-10</span></div><div class="sc-name">Einladungslink &amp; QR-Code</div></div>
+      <div class="sc-toggle" onclick="toggle('p1_qr')">
+        <div class="toggle on" id="t-p1_qr"></div>
+        <span class="toggle-label" id="lbl-p1_qr">Enthalten</span>
+      </div>
+    </div>
+    <div class="sc-desc">Mitarbeitende per Link oder QR-Code in einen bestimmten Bereich einladen — ohne vorab registriert zu sein.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Einladungslink mit Ablaufdatum generieren</li>
+      <li>QR-Code aus Link erzeugen</li>
+      <li>Link führt direkt zum Zielbereich</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">0,5 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+    </div>
+  </div>
+
+  <!-- US-11 -->
+  <div class="story-card">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-11</span><span class="sc-badge badge-req">Pflicht</span></div><div class="sc-name">Privacy &amp; DSGVO</div></div>
+      <div class="sc-toggle"><div class="toggle on locked"></div><span class="toggle-label">Pflicht</span></div>
+    </div>
+    <div class="sc-desc">Niemand sieht die eigene Fremdbewertung — systemseitig erzwungen. Einwilligungen werden dokumentiert, Widersprüche protokolliert.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Systemregel: Sichtsperre eigener Fremdbewertungen</li>
+      <li>Widerspruchs-Flag für Mitarbeitende</li>
+      <li>Einwilligungs-Timestamps dokumentieren</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+    </div>
+  </div>
+
+  <!-- US-12 -->
+  <div class="story-card">
+    <div class="sc-head">
+      <div><div class="sc-meta"><span class="sc-id">US-12</span><span class="sc-badge badge-req">Pflicht</span></div><div class="sc-name">Responsives Design-System</div></div>
+      <div class="sc-toggle"><div class="toggle on locked"></div><span class="toggle-label">Pflicht</span></div>
+    </div>
+    <div class="sc-desc">Einheitliches Design, abgeleitet von der bestehenden Coach-Website. Funktioniert auf Desktop, Tablet und Smartphone.</div>
+    <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
+      <li>Design-System aus Coach-Website ableiten (via Superdesign + MCP)</li>
+      <li>Farben, Typografie und Komponenten festlegen</li>
+      <li>Mobile-First: alle Oberflächen für Smartphone optimiert</li>
+    </ul></div>
+    <div class="sc-pt">
+      <div class="pt-item"><div class="pt-label">Optimistisch</div><div class="pt-value">0,5 PT</div></div>
+      <div class="pt-item featured"><div class="pt-label">Wahrscheinlich</div><div class="pt-value">1 PT</div></div>
+      <div class="pt-item"><div class="pt-label">Konservativ</div><div class="pt-value">1,5 PT</div></div>
+    </div>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="phase-total">
+    <div class="pt-label-big">Phase 1 gesamt</div>
+    <div class="pt-values">
+      <div class="ptv"><div class="ptv-label">Optimistisch</div><div class="ptv-value" id="tot-min">—</div></div>
+      <div class="ptv featured"><div class="ptv-label">Wahrscheinlich</div><div class="ptv-value" id="tot-likely">—</div></div>
+      <div class="ptv"><div class="ptv-label">Konservativ</div><div class="ptv-value" id="tot-max">—</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const state = loadState();
+
+function applyState() {
+  // Toggles
+  ['p1_orgchart', 'p1_vers', 'p1_qr'].forEach(key => {
+    const on = !!state[key];
+    const t = document.getElementById(`t-${key}`);
+    const l = document.getElementById(`lbl-${key}`);
+    if (t) { t.classList.toggle('on', on); }
+    if (l) { l.textContent = on ? 'Enthalten' : 'Nicht enthalten'; }
+    const card = document.getElementById(`card-${key}`);
+    if (card) card.classList.toggle('inactive', !on);
+  });
+
+  // Choices
+  ['std','prem'].forEach(v => {
+    document.getElementById(`opt-meta-${v}`)?.classList.toggle('selected', state.meta === v);
+    document.getElementById(`opt-leit-${v}`)?.classList.toggle('selected', state.leit === v);
+  });
+  document.querySelector(`input[name=meta][value=${state.meta}]`).checked = true;
+  document.querySelector(`input[name=leit][value=${state.leit}]`).checked = true;
+
+  // Leit-prem locked if meta is std
+  const leitPrem = document.getElementById('opt-leit-prem');
+  if (state.meta === 'std') {
+    leitPrem.style.opacity = '0.4';
+    leitPrem.style.pointerEvents = 'none';
+    leitPrem.querySelector('.co-desc').textContent = 'Nur verfügbar, wenn Sprachmuster auf Split-Layout gestellt ist.';
+  } else {
+    leitPrem.style.opacity = '';
+    leitPrem.style.pointerEvents = '';
+  }
+
+  updateTotal();
+}
+
+function toggle(key) {
+  state[key] = !state[key];
+  saveState(state);
+  applyState();
+}
+
+function choose(group, val) {
+  state[group] = val;
+  if (group === 'meta' && val === 'std' && state.leit === 'prem') {
+    state.leit = 'std';
+  }
+  saveState(state);
+  applyState();
+}
+
+function updateTotal() {
+  const active = Object.entries(STORIES).filter(([k, s]) => s.phase === 1 && isActive(k, s, state));
+  const min = active.reduce((s, [, x]) => s + x.min, 0) * RATE;
+  const likely = active.reduce((s, [, x]) => s + x.likely, 0) * RATE;
+  const max = active.reduce((s, [, x]) => s + x.max, 0) * RATE;
+  document.getElementById('tot-min').textContent = fmt(min);
+  document.getElementById('tot-likely').textContent = fmt(likely);
+  document.getElementById('tot-max').textContent = fmt(max);
+  document.getElementById('nav-total').textContent = fmt(likely);
+}
+
+applyState();
+</script>
+</body>
+</html>
