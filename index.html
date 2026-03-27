@@ -448,6 +448,12 @@
 <script>
 lucide.createIcons();
 
+// Förderung initial anwenden
+document.getElementById('foerderung-toggle').classList.add('on');
+document.getElementById('foerderung-status').textContent = '15.000 € eingerechnet';
+document.getElementById('foerderung-status').style.color = '#16a34a';
+document.getElementById('foerderung-net').classList.add('visible');
+
 const COLORS = { 1: '#4d7491', 2: '#16a34a', 3: '#4d7491', 4: '#d61d6b' };
 
 function renderList(phase, state, suffix) {
@@ -629,7 +635,7 @@ document.getElementById('modal-submit').addEventListener('click', () => {
 
 // ── FÖRDERUNG ──────────────────────────────────────────────────────
 const FOERDERUNG = 15000;
-let foerderungActive = false;
+let foerderungActive = true;
 
 function toggleFoerderung() {
   foerderungActive = !foerderungActive;
