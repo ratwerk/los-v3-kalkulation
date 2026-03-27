@@ -227,7 +227,7 @@
         <div class="pbh-right">
           <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-p1">—</div>
-          <div class="price-sub">Modal · häufigster Wert</div>
+          <div class="price-sub" id="pt-p1">—</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-p1"></div></div>
@@ -244,7 +244,7 @@
         <div class="pbh-right">
           <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-pmon">—</div>
-          <div class="price-sub">Modal · häufigster Wert</div>
+          <div class="price-sub" id="pt-pmon">—</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-pmon"></div></div>
@@ -261,7 +261,7 @@
         <div class="pbh-right">
           <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-p2">—</div>
-          <div class="price-sub">Modal · häufigster Wert</div>
+          <div class="price-sub" id="pt-p2">—</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-p2"></div></div>
@@ -278,7 +278,7 @@
         <div class="pbh-right">
           <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-p3">—</div>
-          <div class="price-sub">Modal · häufigster Wert</div>
+          <div class="price-sub" id="pt-p3">—</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-p3"></div></div>
@@ -503,10 +503,14 @@ function render() {
   const state = loadState();
   [1, 2, 3].forEach(p => {
     renderList(p, state);
+    const hours = phaseLikely(p, state) / RATE;
     document.getElementById(`price-p${p}`).textContent = fmt(phaseLikely(p, state));
+    document.getElementById(`pt-p${p}`).textContent = fmtPT(hours) + ' · Modal';
   });
   renderList(4, state, 'mon');
+  const monHours = phaseLikely(4, state) / RATE;
   document.getElementById('price-pmon').textContent = fmt(phaseLikely(4, state));
+  document.getElementById('pt-pmon').textContent = fmtPT(monHours) + ' · Modal';
 
   const posLabel = state.mon_position === 'p2' ? 'nach Phase 2' : 'nach Phase 1';
   document.getElementById('tagline-pmon').textContent = `Einplanung ${posLabel} · Stripe, Abo-Pläne, Rechnungen`;
