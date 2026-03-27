@@ -225,9 +225,9 @@
           <div class="phase-tagline">Architektur, Rollen, Merkmalsprofil, Privacy</div>
         </div>
         <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
+          <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-p1">—</div>
-          <div class="price-sub">wahrscheinlich</div>
+          <div class="price-sub">Modal · häufigster Wert</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-p1"></div></div>
@@ -242,9 +242,9 @@
           <div class="phase-tagline" id="tagline-pmon">Stripe, Abo-Pläne, Rechnungen & Self-Service</div>
         </div>
         <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
+          <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-pmon">—</div>
-          <div class="price-sub">wahrscheinlich</div>
+          <div class="price-sub">Modal · häufigster Wert</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-pmon"></div></div>
@@ -259,9 +259,9 @@
           <div class="phase-tagline">Gespräche, Ziele, ToDos & Vorlagen</div>
         </div>
         <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
+          <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-p2">—</div>
-          <div class="price-sub">wahrscheinlich</div>
+          <div class="price-sub">Modal · häufigster Wert</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-p2"></div></div>
@@ -276,15 +276,21 @@
           <div class="phase-tagline">KI-Features, Datenmigration, Sicherheit & Launch</div>
         </div>
         <div class="pbh-right">
-          <div class="price-label">Planungswert</div>
+          <div class="price-label">Schätzwert</div>
           <div class="price-value" id="price-p3">—</div>
-          <div class="price-sub">wahrscheinlich</div>
+          <div class="price-sub">Modal · häufigster Wert</div>
         </div>
       </div>
       <div class="pbb"><div class="sprint-list" id="list-p3"></div></div>
       <div class="pbf"><span id="count-p3"></span><span class="pbf-arrow">Details & Konfiguration →</span></div>
     </a>
 
+  </div>
+
+  <!-- MODAL SUM NOTE -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px solid var(--border);margin-bottom:12px;font-size:12px;color:#6b7280;gap:12px;">
+    <span>Summe der Schätzwerte (Modal): <strong id="sum-modal" style="color:var(--navy)">—</strong></span>
+    <span style="color:#9ca3af;font-size:11px;">Der Planungswert (P50) ist höher, weil die Monte-Carlo-Simulation die gesamte Unsicherheitsspanne berücksichtigt — nicht nur den wahrscheinlichsten Einzelwert jeder Story.</span>
   </div>
 
   <!-- STATS -->
@@ -513,7 +519,10 @@ function render() {
   if (!active.length) return;
 
   const totalHours = Math.round(active.reduce((s, x) => s + x.likely, 0));
+  const modalSum = active.reduce((s, x) => s + x.likely, 0) * RATE;
   const activePhases = [true, !!state.phase4, !!state.phase2, !!state.phase3].filter(Boolean).length;
+  const sumModalEl = document.getElementById('sum-modal');
+  if (sumModalEl) sumModalEl.textContent = fmt(modalSum);
 
   const sorted = simulate(active);
   const p10 = percentile(sorted, 10), p50 = percentile(sorted, 50), p90 = percentile(sorted, 90);
