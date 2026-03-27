@@ -499,18 +499,24 @@ function renderChart(sorted, p10, p50, p90) {
   });
 }
 
+function phasePT(phase, state) {
+  return Object.entries(STORIES)
+    .filter(([k, s]) => s.phase === phase && isActive(k, s, state))
+    .reduce((sum, [, s]) => sum + Math.round(s.likely / 8 * 2) / 2, 0);
+}
+
 function render() {
   const state = loadState();
   [1, 2, 3].forEach(p => {
     renderList(p, state);
-    const hours = phaseLikely(p, state) / RATE;
-    document.getElementById(`price-p${p}`).textContent = fmt(phaseLikely(p, state));
-    document.getElementById(`pt-p${p}`).textContent = fmtPT(hours) + ' · Schätzwert';
+    const pt = phasePT(p, state);
+    document.getElementById(`price-p${p}`).textContent = fmt(pt * 1600);
+    document.getElementById(`pt-p${p}`).textContent = pt.toLocaleString('de-DE') + ' PT · Schätzwert';
   });
   renderList(4, state, 'mon');
-  const monHours = phaseLikely(4, state) / RATE;
-  document.getElementById('price-pmon').textContent = fmt(phaseLikely(4, state));
-  document.getElementById('pt-pmon').textContent = fmtPT(monHours) + ' · Schätzwert';
+  const ptMon = phasePT(4, state);
+  document.getElementById('price-pmon').textContent = fmt(ptMon * 1600);
+  document.getElementById('pt-pmon').textContent = ptMon.toLocaleString('de-DE') + ' PT · Schätzwert';
 
   const posLabel = state.mon_position === 'p2' ? 'nach Phase 2' : 'nach Phase 1';
   document.getElementById('tagline-pmon').textContent = `Einplanung ${posLabel} · Stripe, Abo-Pläne, Rechnungen`;
@@ -523,7 +529,8 @@ function render() {
   if (!active.length) return;
 
   const totalHours = Math.round(active.reduce((s, x) => s + x.likely, 0));
-  const modalSum = active.reduce((s, x) => s + x.likely, 0) * RATE;
+  const totalPT = active.reduce((s, x) => s + Math.round(x.likely / 8 * 2) / 2, 0);
+  const modalSum = totalPT * 1600;
   const activePhases = [true, !!state.phase4, !!state.phase2, !!state.phase3].filter(Boolean).length;
   const sumModalEl = document.getElementById('sum-modal');
   if (sumModalEl) sumModalEl.textContent = fmt(modalSum);
