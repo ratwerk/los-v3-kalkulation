@@ -114,6 +114,20 @@
     .m-note { font-size: 11px; color: #9ca3af; margin-top: 3px; }
     .metric.featured .m-note { color: rgba(255,255,255,0.4); }
 
+    /* FÖRDERUNG */
+    .foerderung-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); flex-wrap: wrap; }
+    .foerderung-left { display: flex; align-items: center; gap: 12px; }
+    .foerderung-label { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .foerderung-note { font-size: 11px; color: #9ca3af; }
+    .foerderung-net { display: none; margin-top: 12px; padding: 14px 18px; background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .foerderung-net.visible { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .foerderung-net-label { font-size: 12px; font-weight: 600; color: #16a34a; }
+    .foerderung-net-values { display: flex; gap: 24px; }
+    .fnv { text-align: center; }
+    .fnv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #6b7280; }
+    .fnv-value { font-size: 18px; font-weight: 700; color: #16a34a; line-height: 1.2; }
+    .fnv-sub { font-size: 10px; color: #9ca3af; }
+
     .chart-box { background: var(--white); border: 1px solid var(--border); padding: 20px; }
     .chart-box h3 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
     .chart-box p { font-size: 11px; color: #9ca3af; margin-bottom: 12px; }
@@ -314,6 +328,26 @@
         <div class="m-note">Puffer für unbekannte Risiken</div>
       </div>
     </div>
+
+    <!-- FÖRDERUNG -->
+    <div class="foerderung-row">
+      <div class="foerderung-left">
+        <div class="toggle" id="foerderung-toggle" onclick="toggleFoerderung()"></div>
+        <div>
+          <div class="foerderung-label">Digitalbonus / Förderung einrechnen</div>
+          <div class="foerderung-note">15.000 € · monatlicher Antrag läuft</div>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#9ca3af;" id="foerderung-status">Nicht eingerechnet</div>
+    </div>
+    <div class="foerderung-net" id="foerderung-net">
+      <div class="foerderung-net-label">✓ Nettoinvestition nach Förderung (15.000 € abgezogen)</div>
+      <div class="foerderung-net-values">
+        <div class="fnv"><div class="fnv-label">Optimistisch</div><div class="fnv-value" id="net-p10">—</div><div class="fnv-sub">P10</div></div>
+        <div class="fnv"><div class="fnv-label">Planungswert</div><div class="fnv-value" id="net-p50">—</div><div class="fnv-sub">P50</div></div>
+        <div class="fnv"><div class="fnv-label">Konservativ</div><div class="fnv-value" id="net-p90">—</div><div class="fnv-sub">P90</div></div>
+      </div>
+    </div>
   </div>
 
   <div class="chart-box">
@@ -484,6 +518,10 @@ function render() {
   document.getElementById('total-p50').textContent = fmt(p50);
   document.getElementById('total-p90').textContent = fmt(p90);
 
+  document.getElementById('net-p10').textContent = fmt(applyFoerderung(p10));
+  document.getElementById('net-p50').textContent = fmt(applyFoerderung(p50));
+  document.getElementById('net-p90').textContent = fmt(applyFoerderung(p90));
+
   renderChart(sorted, p10, p50, p90);
 }
 
@@ -589,6 +627,24 @@ document.getElementById('modal-submit').addEventListener('click', () => {
   showToast('E-Mail-Client geöffnet');
 });
 
+// ── FÖRDERUNG ──────────────────────────────────────────────────────
+const FOERDERUNG = 15000;
+let foerderungActive = false;
+
+function toggleFoerderung() {
+  foerderungActive = !foerderungActive;
+  const toggle = document.getElementById('foerderung-toggle');
+  toggle.classList.toggle('on', foerderungActive);
+  document.getElementById('foerderung-status').textContent = foerderungActive ? '15.000 € eingerechnet' : 'Nicht eingerechnet';
+  document.getElementById('foerderung-status').style.color = foerderungActive ? '#16a34a' : '#9ca3af';
+  document.getElementById('foerderung-net').classList.toggle('visible', foerderungActive);
+  updateROI();
+}
+
+function applyFoerderung(value) {
+  return foerderungActive ? Math.max(0, value - FOERDERUNG) : value;
+}
+
 // ── ROI RECHNER ────────────────────────────────────────────────────
 let roiChartInst = null;
 
@@ -643,16 +699,17 @@ function updateROI() {
   const state = loadState();
   const active = Object.entries(STORIES).filter(([k, s]) => isActive(k, s, state)).map(([, s]) => s);
   const sorted = active.length ? simulate(active) : [];
-  const p50 = sorted.length ? percentile(sorted, 50) : 0;
+  const p50raw = sorted.length ? percentile(sorted, 50) : 0;
+  const p50net = applyFoerderung(p50raw);
 
-  if (p50 > 0 && monthly > 0) {
-    const months = Math.ceil(p50 / monthly);
-    document.getElementById('roi-breakeven').textContent = months + ' Monate';
+  if (p50raw > 0 && monthly > 0) {
+    const months = Math.ceil(p50net / monthly);
+    document.getElementById('roi-breakeven').textContent = months + ' Monate' + (foerderungActive ? ' (nach Förderung)' : '');
   } else {
     document.getElementById('roi-breakeven').textContent = '—';
   }
 
-  renderROIChart(monthly, p50);
+  renderROIChart(monthly, p50net);
 }
 
 document.getElementById('roi-customers').addEventListener('input', updateROI);
