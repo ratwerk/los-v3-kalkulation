@@ -303,10 +303,10 @@
     </div>
 
     <!-- US-24 -->
-    <div class="story-card" id="card-p3_launch">
+    <div class="story-card locked-on" id="card-p3_launch">
       <div class="sc-head">
         <div><div class="sc-meta"><span class="sc-id">US-24</span></div><div class="sc-name">Abnahme, Launch &amp; Einweisung</div></div>
-        <div class="sc-toggle" onclick="toggle('p3_launch')"><div class="toggle on" id="t-p3_launch"></div><span class="toggle-label" id="lbl-p3_launch">Enthalten</span></div>
+        <div class="sc-toggle"><div class="toggle on locked" id="t-p3_launch"></div><span class="toggle-label" id="lbl-p3_launch">Pflicht</span></div>
       </div>
       <div class="sc-desc">Produktions-Deployment, Abnahme-Tests mit dem Auftraggeber, Einweisung aller Rollen und Kurzanleitungen.</div>
       <div class="sc-steps"><div class="sc-steps-title">Enthaltene Schritte</div><ul>
@@ -337,7 +337,7 @@
 <script src="shared.js"></script>
 <script>
 const state = loadState();
-const KEYS = ['p3_anon','p3_ki_meta','p3_staerken','p3_ki_hints','p3_smart','p3_chat','p3_migration','p3_audit','p3_crypt','p3_launch'];
+const KEYS = ['p3_anon','p3_ki_meta','p3_staerken','p3_ki_hints','p3_smart','p3_chat','p3_migration','p3_audit','p3_crypt'];
 
 function kiActive() {
   return ['p3_ki_meta','p3_staerken','p3_ki_hints','p3_smart','p3_chat'].some(k => state[k]);
@@ -359,6 +359,9 @@ function applyState() {
   if (la) la.textContent = ki ? 'Pflicht (KI aktiv)' : (anon ? 'Enthalten' : 'Nicht enthalten');
   const cardAnon = document.getElementById('card-p3_anon');
   if (cardAnon) cardAnon.classList.toggle('locked-on', ki);
+
+  // p3_launch ist immer Pflicht
+  state.p3_launch = true;
 
   KEYS.filter(k => k !== 'p3_anon').forEach(key => {
     const on = !!state[key];
