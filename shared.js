@@ -149,7 +149,7 @@ const STORIES = {
     desc:'Personenbezogene Daten werden verschlüsselt gespeichert. Schlüsselverwaltung nach DSGVO-Anforderungen.',
     steps:['Personenbezogene Felder identifizieren','Verschlüsselung at rest implementieren','Key Management nach DSGVO'] },
 
-  p3_launch:    { phase:3, min:8,  likely:14, max:22, type:'toggle', stateKey:'p3_launch', defaultOn:true,
+  p3_launch:    { phase:3, min:4,  likely:8, max:12, type:'toggle', stateKey:'p3_launch', defaultOn:true,
     id:'US-24', name:'Abnahme, Launch & Einweisung',
     desc:'Produktions-Deployment, Abnahme-Tests mit dem Auftraggeber, Einweisung aller Rollen und Kurzanleitungen.',
     steps:['Produktions-Deployment und finale Tests','Abnahme mit Auftraggeber','Einweisung für alle Rollen (Admin, FK, MA)','Kurzanleitungen erstellen'] },
