@@ -289,7 +289,7 @@
 
   <!-- MODAL SUM NOTE -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px solid var(--border);margin-bottom:12px;font-size:12px;color:#6b7280;gap:12px;">
-    <span>Summe der Schätzwerte (Modal): <strong id="sum-modal" style="color:var(--navy)">—</strong></span>
+    <span>Summe der Schätzwerte: <strong id="sum-modal" style="color:var(--navy)">—</strong></span>
     <span style="color:#9ca3af;font-size:11px;">Der Planungswert (P50) ist höher, weil die Monte-Carlo-Simulation die gesamte Unsicherheitsspanne berücksichtigt — nicht nur den wahrscheinlichsten Einzelwert jeder Story.</span>
   </div>
 
@@ -505,12 +505,12 @@ function render() {
     renderList(p, state);
     const hours = phaseLikely(p, state) / RATE;
     document.getElementById(`price-p${p}`).textContent = fmt(phaseLikely(p, state));
-    document.getElementById(`pt-p${p}`).textContent = fmtPT(hours) + ' · Modal';
+    document.getElementById(`pt-p${p}`).textContent = fmtPT(hours) + ' · Schätzwert';
   });
   renderList(4, state, 'mon');
   const monHours = phaseLikely(4, state) / RATE;
   document.getElementById('price-pmon').textContent = fmt(phaseLikely(4, state));
-  document.getElementById('pt-pmon').textContent = fmtPT(monHours) + ' · Modal';
+  document.getElementById('pt-pmon').textContent = fmtPT(monHours) + ' · Schätzwert';
 
   const posLabel = state.mon_position === 'p2' ? 'nach Phase 2' : 'nach Phase 1';
   document.getElementById('tagline-pmon').textContent = `Einplanung ${posLabel} · Stripe, Abo-Pläne, Rechnungen`;

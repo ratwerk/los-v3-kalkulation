@@ -78,6 +78,8 @@
     .ptv-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
     .ptv-value { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink); }
     .ptv.featured .ptv-value { color: var(--phase); }
+    .ptv-sub { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+    .ptv.featured .ptv-sub { color: rgba(255,255,255,0.6); }
     @media (max-width: 700px) { .stories { grid-template-columns: 1fr; } }
   </style>
   <link rel="stylesheet" href="shared-design.css">
@@ -327,9 +329,9 @@
   <div class="phase-total">
     <div class="pt-label-big">Phase 3 gesamt</div>
     <div class="pt-values">
-      <div class="ptv"><div class="ptv-label">Optimistisch</div><div class="ptv-value" id="tot-min">—</div></div>
-      <div class="ptv featured"><div class="ptv-label">Wahrscheinlich</div><div class="ptv-value" id="tot-likely">—</div></div>
-      <div class="ptv"><div class="ptv-label">Konservativ</div><div class="ptv-value" id="tot-max">—</div></div>
+      <div class="ptv"><div class="ptv-label">Optimistisch</div><div class="ptv-value" id="tot-min">—</div><div class="ptv-sub" id="pt-min">—</div></div>
+      <div class="ptv featured"><div class="ptv-label">Wahrscheinlich</div><div class="ptv-value" id="tot-likely">—</div><div class="ptv-sub" id="pt-likely">—</div></div>
+      <div class="ptv"><div class="ptv-label">Konservativ</div><div class="ptv-value" id="tot-max">—</div><div class="ptv-sub" id="pt-max">—</div></div>
     </div>
   </div>
 </div>
@@ -391,13 +393,16 @@ function toggle(key) {
 
 function updateTotal() {
   const active = Object.entries(STORIES).filter(([k, s]) => s.phase === 3 && isActive(k, s, state));
-  const min = active.reduce((s, [, x]) => s + x.min, 0) * RATE;
-  const likely = active.reduce((s, [, x]) => s + x.likely, 0) * RATE;
-  const max = active.reduce((s, [, x]) => s + x.max, 0) * RATE;
-  document.getElementById('tot-min').textContent = fmt(min);
-  document.getElementById('tot-likely').textContent = fmt(likely);
-  document.getElementById('tot-max').textContent = fmt(max);
-  document.getElementById('nav-total').textContent = fmt(likely);
+  const minH = active.reduce((s, [, x]) => s + x.min, 0);
+  const likelyH = active.reduce((s, [, x]) => s + x.likely, 0);
+  const maxH = active.reduce((s, [, x]) => s + x.max, 0);
+  document.getElementById('tot-min').textContent = fmt(minH * RATE);
+  document.getElementById('tot-likely').textContent = fmt(likelyH * RATE);
+  document.getElementById('tot-max').textContent = fmt(maxH * RATE);
+  document.getElementById('pt-min').textContent = fmtPT(minH);
+  document.getElementById('pt-likely').textContent = fmtPT(likelyH);
+  document.getElementById('pt-max').textContent = fmtPT(maxH);
+  document.getElementById('nav-total').textContent = fmt(likelyH * RATE);
 }
 
 applyState();
