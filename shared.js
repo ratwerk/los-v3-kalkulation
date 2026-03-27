@@ -107,7 +107,7 @@ const STORIES = {
     desc:'Technische Grundlage für alle KI-Features. Freitexte und Namen werden vor der KI-Verarbeitung anonymisiert — Klarnamen verlassen das System nie.',
     steps:['Personenbezogene Felder vor KI-Aufruf anonymisieren (NER)','IDs statt Klarnamen in KI-Prompts','Serverseitige Rückübersetzung der KI-Antwort','DSGVO-konform: keine Klarnamen an externe KI-API'] },
 
-  p3_ki_meta:   { phase:3, min:12, likely:26, max:38, type:'toggle', stateKey:'p3_ki_meta', defaultOn:true, kiFeature:true,
+  p3_ki_meta:   { phase:3, min:10, likely:20, max:32, type:'toggle', stateKey:'p3_ki_meta', defaultOn:true, kiFeature:true,
     id:'US-08', name:'KI-Vorschläge: Metaprogramme & Stärken',
     desc:'Die KI analysiert das Merkmalsprofil und schlägt passende Teamrollen und Stärken vor — mit Begründung. Vorschläge können übernommen oder verworfen werden.',
     steps:['Metaprogramm-Werte und Führungsprofil als KI-Kontext aufbereiten','KI-Analyse: passende Teamrollen und Stärken ermitteln','Vorschläge mit Begründung anzeigen','Übernahme ins Profil mit einem Klick'] },

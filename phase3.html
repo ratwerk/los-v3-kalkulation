@@ -8,7 +8,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --paper: #F9F7F2; --paper-dark: #F0EDE5; --ink: #1A1A1A; --ink-soft: #4A4A4A;
-      --ink-faint: #8A8A8A; --rule: #D8D3C8; --phase: #4d7491; --phase-bg: #e6edf3;
+      --ink-faint: #8A8A8A; --rule: #D8D3C8; --phase: #d61d6b; --phase-bg: #fce4ee;
     }
     html { scroll-behavior: smooth; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
@@ -81,6 +81,15 @@
     @media (max-width: 700px) { .stories { grid-template-columns: 1fr; } }
   </style>
   <link rel="stylesheet" href="shared-design.css">
+  <style>
+    .story-card { border-color: #d61d6b !important; }
+    .phase-total { border-color: #d61d6b !important; }
+    .phase-switch { border-color: #d61d6b !important; }
+    .sc-pt { background: #d61d6b !important; border-top-color: #d61d6b !important; }
+    .sc-pt .pt-label { color: rgba(255,255,255,0.7) !important; }
+    .sc-pt .pt-value { color: #fff !important; }
+    .sc-name { color: #d61d6b !important; }
+  </style>
 </head>
 <body>
 
