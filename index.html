@@ -119,6 +119,10 @@
     .foerderung-left { display: flex; align-items: center; gap: 12px; }
     .foerderung-label { font-size: 13px; font-weight: 600; color: var(--navy); }
     .foerderung-note { font-size: 11px; color: #9ca3af; }
+    .f-switch { width: 44px; height: 24px; border-radius: 12px; background: #d1d5db; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; border: none; }
+    .f-switch.on { background: #16a34a; }
+    .f-switch::after { content:''; position:absolute; width:18px; height:18px; background:white; border-radius:50%; top:3px; left:3px; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+    .f-switch.on::after { transform: translateX(20px); }
     .foerderung-net { display: none; margin-top: 12px; padding: 14px 18px; background: #f0fdf4; border: 1px solid #bbf7d0; }
     .foerderung-net.visible { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .foerderung-net-label { font-size: 12px; font-weight: 600; color: #16a34a; }
@@ -332,7 +336,7 @@
     <!-- FÖRDERUNG -->
     <div class="foerderung-row">
       <div class="foerderung-left">
-        <div class="toggle" id="foerderung-toggle" onclick="toggleFoerderung()"></div>
+        <button class="f-switch on" id="foerderung-toggle" onclick="toggleFoerderung()"></button>
         <div>
           <div class="foerderung-label">Digitalbonus / Förderung einrechnen</div>
           <div class="foerderung-note">15.000 € · monatlicher Antrag läuft</div>
@@ -448,15 +452,9 @@
 <script>
 lucide.createIcons();
 
-// Förderung initial anwenden
-document.getElementById('foerderung-toggle').classList.add('on');
-document.getElementById('foerderung-status').textContent = '15.000 € eingerechnet';
-document.getElementById('foerderung-status').style.color = '#16a34a';
-document.getElementById('foerderung-net').classList.add('visible');
-
 const COLORS = { 1: '#4d7491', 2: '#16a34a', 3: '#4d7491', 4: '#d61d6b' };
 const FOERDERUNG = 15000;
-let foerderungActive = true;
+var foerderungActive = true;
 function applyFoerderung(value) { return foerderungActive ? Math.max(0, value - FOERDERUNG) : value; }
 
 function renderList(phase, state, suffix) {
@@ -534,7 +532,6 @@ function render() {
   renderChart(sorted, p10, p50, p90);
 }
 
-render();
 window.addEventListener('pageshow', render);
 
 // ── TOAST ─────────────────────────────────────────────────────────
@@ -639,12 +636,19 @@ document.getElementById('modal-submit').addEventListener('click', () => {
 // ── FÖRDERUNG ──────────────────────────────────────────────────────
 function toggleFoerderung() {
   foerderungActive = !foerderungActive;
-  const toggle = document.getElementById('foerderung-toggle');
-  toggle.classList.toggle('on', foerderungActive);
+  document.getElementById('foerderung-toggle').classList.toggle('on', foerderungActive);
   document.getElementById('foerderung-status').textContent = foerderungActive ? '15.000 € eingerechnet' : 'Nicht eingerechnet';
   document.getElementById('foerderung-status').style.color = foerderungActive ? '#16a34a' : '#9ca3af';
   document.getElementById('foerderung-net').classList.toggle('visible', foerderungActive);
+  render();
   updateROI();
+}
+
+function initFoerderung() {
+  document.getElementById('foerderung-toggle').classList.toggle('on', foerderungActive);
+  document.getElementById('foerderung-status').textContent = foerderungActive ? '15.000 € eingerechnet' : 'Nicht eingerechnet';
+  document.getElementById('foerderung-status').style.color = foerderungActive ? '#16a34a' : '#9ca3af';
+  document.getElementById('foerderung-net').classList.toggle('visible', foerderungActive);
 }
 
 
@@ -717,6 +721,9 @@ function updateROI() {
 
 document.getElementById('roi-customers').addEventListener('input', updateROI);
 document.getElementById('roi-fee').addEventListener('input', updateROI);
+
+render();
+initFoerderung();
 updateROI();
 </script>
 </body>
