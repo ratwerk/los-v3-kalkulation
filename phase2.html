@@ -281,19 +281,16 @@ function toggle(key) {
 
 function updateTotal() {
   const active = Object.entries(STORIES).filter(([k, s]) => s.phase === 2 && isActive(k, s, state));
-  const minH = active.reduce((s, [, x]) => s + x.min, 0);
-  const likelyH = active.reduce((s, [, x]) => s + x.likely, 0);
-  const maxH = active.reduce((s, [, x]) => s + x.max, 0);
-  document.getElementById('tot-min').textContent = fmt(minH * RATE);
-  document.getElementById('tot-likely').textContent = fmt(likelyH * RATE);
-  document.getElementById('tot-max').textContent = fmt(maxH * RATE);
   const ptMin = active.reduce((s, [, x]) => s + Math.round(x.min / 8 * 2) / 2, 0);
   const ptLikely = active.reduce((s, [, x]) => s + Math.round(x.likely / 8 * 2) / 2, 0);
   const ptMax = active.reduce((s, [, x]) => s + Math.round(x.max / 8 * 2) / 2, 0);
+  document.getElementById('tot-min').textContent = fmt(ptMin * 1600);
+  document.getElementById('tot-likely').textContent = fmt(ptLikely * 1600);
+  document.getElementById('tot-max').textContent = fmt(ptMax * 1600);
   document.getElementById('pt-min').textContent = ptMin.toLocaleString('de-DE') + ' PT';
   document.getElementById('pt-likely').textContent = ptLikely.toLocaleString('de-DE') + ' PT';
   document.getElementById('pt-max').textContent = ptMax.toLocaleString('de-DE') + ' PT';
-  document.getElementById('nav-total').textContent = fmt(likelyH * RATE);
+  document.getElementById('nav-total').textContent = fmt(ptLikely * 1600);
 }
 
 applyState();
