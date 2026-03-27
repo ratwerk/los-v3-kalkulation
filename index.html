@@ -455,6 +455,9 @@ document.getElementById('foerderung-status').style.color = '#16a34a';
 document.getElementById('foerderung-net').classList.add('visible');
 
 const COLORS = { 1: '#4d7491', 2: '#16a34a', 3: '#4d7491', 4: '#d61d6b' };
+const FOERDERUNG = 15000;
+let foerderungActive = true;
+function applyFoerderung(value) { return foerderungActive ? Math.max(0, value - FOERDERUNG) : value; }
 
 function renderList(phase, state, suffix) {
   const id = suffix || phase;
@@ -634,9 +637,6 @@ document.getElementById('modal-submit').addEventListener('click', () => {
 });
 
 // ── FÖRDERUNG ──────────────────────────────────────────────────────
-const FOERDERUNG = 15000;
-let foerderungActive = true;
-
 function toggleFoerderung() {
   foerderungActive = !foerderungActive;
   const toggle = document.getElementById('foerderung-toggle');
@@ -647,9 +647,6 @@ function toggleFoerderung() {
   updateROI();
 }
 
-function applyFoerderung(value) {
-  return foerderungActive ? Math.max(0, value - FOERDERUNG) : value;
-}
 
 // ── ROI RECHNER ────────────────────────────────────────────────────
 let roiChartInst = null;
