@@ -287,9 +287,12 @@ function updateTotal() {
   document.getElementById('tot-min').textContent = fmt(minH * RATE);
   document.getElementById('tot-likely').textContent = fmt(likelyH * RATE);
   document.getElementById('tot-max').textContent = fmt(maxH * RATE);
-  document.getElementById('pt-min').textContent = fmtPT(minH) + ' · ' + Math.round(minH) + ' h';
-  document.getElementById('pt-likely').textContent = fmtPT(likelyH) + ' · ' + Math.round(likelyH) + ' h';
-  document.getElementById('pt-max').textContent = fmtPT(maxH) + ' · ' + Math.round(maxH) + ' h';
+  const ptMin = active.reduce((s, [, x]) => s + Math.round(x.min / 8 * 2) / 2, 0);
+  const ptLikely = active.reduce((s, [, x]) => s + Math.round(x.likely / 8 * 2) / 2, 0);
+  const ptMax = active.reduce((s, [, x]) => s + Math.round(x.max / 8 * 2) / 2, 0);
+  document.getElementById('pt-min').textContent = ptMin.toLocaleString('de-DE') + ' PT';
+  document.getElementById('pt-likely').textContent = ptLikely.toLocaleString('de-DE') + ' PT';
+  document.getElementById('pt-max').textContent = ptMax.toLocaleString('de-DE') + ' PT';
   document.getElementById('nav-total').textContent = fmt(likelyH * RATE);
 }
 
