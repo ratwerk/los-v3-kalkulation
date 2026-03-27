@@ -154,10 +154,21 @@
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--navy); color: white; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 600; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ROI CALCULATOR */
+    .roi-box { background: var(--white); padding: 24px; margin-bottom: 16px; border-top: 3px solid var(--navy); }
+    .roi-box .cost-title { margin-bottom: 20px; }
+    .roi-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 24px; }
+    .roi-input-group { display: flex; flex-direction: column; gap: 6px; }
+    .roi-label { font-size: 12px; font-weight: 600; color: #6b7280; display: flex; justify-content: space-between; align-items: baseline; }
+    .roi-val { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .roi-slider { width: 100%; accent-color: var(--navy); cursor: pointer; height: 4px; }
+    .roi-range-labels { display: flex; justify-content: space-between; font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
     @media (max-width: 700px) {
       .phases { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: 1fr; }
       .metrics { grid-template-columns: 1fr; }
+      .roi-inputs { grid-template-columns: 1fr; }
     }
     @media (max-width: 580px) {
       .s-name { width: 120px; }
@@ -310,6 +321,49 @@
     <p>50.000 Monte-Carlo-Simulationen · Dreiecksverteilung pro Baustein</p>
     <div class="chart-wrap"><canvas id="chart"></canvas></div>
   </div>
+
+  <!-- ROI CALCULATOR -->
+  <div class="roi-box">
+    <div class="cost-title">
+      <i data-lucide="trending-up" style="width:15px;height:15px;color:var(--magenta)"></i>
+      Monetarisierungschance — ROI-Rechner
+    </div>
+    <div class="roi-inputs">
+      <div class="roi-input-group">
+        <label class="roi-label">Unternehmenskunden <span class="roi-val" id="roi-customers-val">5</span></label>
+        <input type="range" class="roi-slider" id="roi-customers" min="1" max="50" value="5">
+        <div class="roi-range-labels"><span>1 Kunde</span><span>50 Kunden</span></div>
+      </div>
+      <div class="roi-input-group">
+        <label class="roi-label">Monatliche Lizenzgebühr <span class="roi-val" id="roi-fee-val">500 €</span></label>
+        <input type="range" class="roi-slider" id="roi-fee" min="100" max="2000" step="50" value="500">
+        <div class="roi-range-labels"><span>100 €</span><span>2.000 €</span></div>
+      </div>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="m-label">Monatliche Einnahmen</div>
+        <div class="m-value" id="roi-monthly">—</div>
+        <div class="m-note">wiederkehrend</div>
+      </div>
+      <div class="metric">
+        <div class="m-label">Jährliche Einnahmen</div>
+        <div class="m-value" id="roi-annual">—</div>
+        <div class="m-note">pro Jahr</div>
+      </div>
+      <div class="metric featured">
+        <div class="m-label">Break-even</div>
+        <div class="m-value" id="roi-breakeven">—</div>
+        <div class="m-note">Monate bis Amortisation (P50)</div>
+      </div>
+      <div class="metric">
+        <div class="m-label">Einnahmen über 3 Jahre</div>
+        <div class="m-value" id="roi-3y">—</div>
+        <div class="m-note">kumuliert</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- SEND MODAL -->
@@ -529,6 +583,36 @@ document.getElementById('modal-submit').addEventListener('click', () => {
   document.getElementById('send-modal').classList.remove('open');
   showToast('E-Mail-Client geöffnet');
 });
+
+// ── ROI RECHNER ────────────────────────────────────────────────────
+function updateROI() {
+  const customers = parseInt(document.getElementById('roi-customers').value);
+  const fee = parseInt(document.getElementById('roi-fee').value);
+  const monthly = customers * fee;
+  const annual = monthly * 12;
+  const threeYear = monthly * 36;
+
+  document.getElementById('roi-customers-val').textContent = customers;
+  document.getElementById('roi-fee-val').textContent = fee.toLocaleString('de-DE') + ' €';
+  document.getElementById('roi-monthly').textContent = monthly.toLocaleString('de-DE') + ' €';
+  document.getElementById('roi-annual').textContent = annual.toLocaleString('de-DE') + ' €';
+  document.getElementById('roi-3y').textContent = threeYear.toLocaleString('de-DE') + ' €';
+
+  const state = loadState();
+  const active = Object.entries(STORIES).filter(([k, s]) => isActive(k, s, state)).map(([, s]) => s);
+  const sorted = active.length ? simulate(active) : [];
+  const p50 = sorted.length ? percentile(sorted, 50) : 0;
+  if (p50 > 0 && monthly > 0) {
+    const months = Math.ceil(p50 / monthly);
+    document.getElementById('roi-breakeven').textContent = months + ' Monate';
+  } else {
+    document.getElementById('roi-breakeven').textContent = '—';
+  }
+}
+
+document.getElementById('roi-customers').addEventListener('input', updateROI);
+document.getElementById('roi-fee').addEventListener('input', updateROI);
+updateROI();
 </script>
 </body>
 </html>
